@@ -1,0 +1,8 @@
+Makefile
+configure
+config.log
+config.status
+efup
+*.o
+*.so
+out

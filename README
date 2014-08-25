@@ -1,0 +1,106 @@
+EFUP - Embedded Field Upgrade Program
+
+Introduction
+------------
+
+The Embedded Field Update Program (or EFUP for short) is a scriptable
+utility for flashing a system update to a target device.
+
+It is meant to be placed into a ramdisk with update script(s) and optionally
+update keys (if only trusted update files should be loaded).
+
+Update scripts may be created using the LUA scripting language (and APIs)
+and scripting commands described in this document.
+
+Building
+--------
+
+The following development headers and libaries are required:
+
+   - zlib
+
+EFUP may then be built with:
+
+   autoconf -i
+   ./configure
+   make
+
+Scripting commands
+------------------
+
+efup:extract(<archive>, <folder>)
+
+   The specified archive is loaded from the current update source (see
+   efup:source) and extracted to the specified folder. Supported archive
+   types are: .tar.bz2 and .tar.gz.
+
+   Example: efup:extract("data.tar.bz2", "/data")
+
+efup:format(<volume>)
+
+   Format the specified volume (which shall not be mounted). The file-system
+   type is determined from the previously parsed fstab file.
+
+   Example: efup:format("/data")
+
+efup:fstab(<fstab-file>)
+
+   Load the volume list from the specified fstab(5) file. Note that only the
+   first three fields are actually used by EFUP (namely fs_spec, fs_file and
+   fs_vfstype). Note that commands requiring a volume (such as efup:format)
+   will fail if no volume list was loaded.
+
+   Example: efup:fstab("/etc/efup.fstab")
+
+efup:mount(<volume>)
+
+   Mount the specified volume. The device and file-system type are determined
+   from the previously parsed fstab file (see efup:fstab).
+
+   Example: efup:mount("/data")
+
+efup:run(<script>)
+
+   Load the specified LUA script from the current update source (see
+   efup:source) and execute it.
+
+   Example: efup:run("download.lua")
+
+efup:source(<source>)
+
+   Specify the source for update files. Valid sources are local folders (e.g.,
+   file:///mnt) or local zip files (e.g. file:///sdcard/update.zip). Local
+   zip file sources may be signed and verified with efup:verify().
+
+   Example: efup:source("file://update.zip")
+
+efup:umount(<volume>)
+
+   Unmount the specified volume. Only volumes from the previously parsed fstab
+   file (see efup:fstab).
+
+   Example: efup:umount("/data")
+
+efup:verify()
+
+   Verify the signature of the current source. At present, this is only
+   supported for local zip file sources. See the Signing section of this
+   document for details on signing update zip files.
+
+   Example: efup:verify()
+
+Signing
+-------
+
+Update files may be packaged into an smime'd zip file
+
+    $ openssl smime -passin pass:abcdefg -binary \
+        -sign -signer self.cert -inkey self.privkey \
+        -in unsigned-update.zip -out signed-update.zip \
+        -outform DER -nodetach
+
+and verified with:
+
+    efup:source("file://signed-update.zip")
+    efup:verify()
+
