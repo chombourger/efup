@@ -104,3 +104,16 @@ and verified with:
     efup:source("file://signed-update.zip")
     efup:verify()
 
+Implementation Notes
+--------------------
+
+Signing messages with SMIME results in bytes being prepended and appended
+to the message. For zip files, the decompression code consequently needs
+to skip the leading bytes (searching for the first ZIP entry) and search
+for the central directory normally located at the end of the file. While
+the included libzip could handle the latter just fine, modifications were
+required to search the actual start of the ZIP archive and apply that
+offset when seeking within the archive for ZIP entries. The zip libary
+will search for the archive start and for the central directory within the
+first and last 64Kb of the input file. 
+
