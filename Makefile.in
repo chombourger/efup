@@ -11,3 +11,7 @@ CPPFLAGS = @CPPFLAGS@
 
 include main.mk
 
+.PHONY: distclean
+
+distclean: clean
+	rm -f config.log config.status Makefile configure
