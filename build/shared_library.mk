@@ -39,5 +39,6 @@ lib$(module).so: $($(module)_deps)
 	@echo LD $(module)
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(CC) -shared -o $@				\
-		$($(module)_o_files) $($(module)_ld_flags)
+		$($(module)_o_files) $($(module)_ld_flags)	\
+		$($(module)_ldlibs)				\
 

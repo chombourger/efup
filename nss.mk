@@ -4,11 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
-###################################### NSPR ##################################
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := nspr$(NSPR_SHLIB_VERSION)
-
 ifndef MACHINE
 ifeq ($(HOST_CPU),x86_64)
 MACHINE:=x86_64
@@ -33,6 +28,12 @@ else
 $(error could not determine target system!)
 endif
 
+###################################### NSPR ##################################
+
+ifndef WITH_SYSTEM_NSPR
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := nspr$(NSPR_SHLIB_VERSION)
 
 NSPR = external/nspr/pr
 NSPR_DS = external/nspr/lib/ds
@@ -133,7 +134,12 @@ endif # Linux
 
 include $(BUILD_SHARED_LIBRARY)
 
+endif # WITH_SYSTEM_NSPR
+
+
 ###################################### NSS ###################################
+
+ifndef WITH_SYSTEM_NSS
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := nss$(NSS_SHLIB_VERSION)
@@ -141,11 +147,7 @@ LOCAL_MODULE := nss$(NSS_SHLIB_VERSION)
 NSS := external/nss/lib
 
 LOCAL_C_INCLUDES +=					\
-	.						\
-	include/nspr					\
-	external/nspr/pr/include			\
-	external/nspr/lib/ds				\
-	external/nspr/lib/libc/include			\
+	$(NSPR_C_INCLUDES)				\
 	external/nss/lib/base				\
 	external/nss/lib/certdb				\
 	external/nss/lib/certhigh			\
@@ -191,6 +193,9 @@ LOCAL_CFLAGS += -DNSS_USE_64 # FIXME
 LOCAL_CFLAGS += -DUSE_UTIL_DIRECTLY
 LOCAL_CFLAGS += -DMOZILLA_CLIENT
 LOCAL_CFLAGS += -DNSS_PKIX_NO_LDAP
+
+LOCAL_CFLAGS += $(NSPR_CFLAGS)
+LOCAL_LDLIBS += $(NSPR_LIBS)
 
 LOCAL_SRC_FILES +=					\
 	$(NSS)/base/arena.c				\
@@ -259,121 +264,121 @@ LOCAL_SRC_FILES +=					\
 	$(NSS)/libpkix/pkix_pl_nss/module/pkix_pl_pk11certstore.c	\
 	$(NSS)/libpkix/pkix_pl_nss/module/pkix_pl_socket.c		\
 	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_basicconstraints.c	\
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_cert.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_certpolicyinfo.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_certpolicymap.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_certpolicyqualifier.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_crl.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_crldp.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_crlentry.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_date.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_generalname.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_infoaccess.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_nameconstraints.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_ocsprequest.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_ocspresponse.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_publickey.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_x500name.c \
-	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_ocspcertid.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_bigint.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_bytearray.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_common.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_error.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_hashtable.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_lifecycle.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_mem.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_monitorlock.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_mutex.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_object.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_oid.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_primhash.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_rwlock.c \
-	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_string.c \
-	$(NSS)/certdb/alg1485.c \
-	$(NSS)/certdb/certdb.c \
-	$(NSS)/certdb/certv3.c \
-	$(NSS)/certdb/certxutl.c \
-	$(NSS)/certdb/crl.c \
-	$(NSS)/certdb/genname.c \
-	$(NSS)/certdb/stanpcertdb.c \
-	$(NSS)/certdb/polcyxtn.c \
-	$(NSS)/certdb/secname.c \
-	$(NSS)/certdb/xauthkid.c \
-	$(NSS)/certdb/xbsconst.c \
-	$(NSS)/certdb/xconst.c \
-	$(NSS)/certhigh/certhtml.c \
-	$(NSS)/certhigh/certreq.c \
-	$(NSS)/certhigh/crlv2.c \
-	$(NSS)/certhigh/ocsp.c \
-	$(NSS)/certhigh/ocspsig.c \
-	$(NSS)/certhigh/certhigh.c \
-	$(NSS)/certhigh/certvfy.c \
-	$(NSS)/certhigh/certvfypkix.c \
-	$(NSS)/certhigh/certvfypkixprint.c \
-	$(NSS)/certhigh/xcrldist.c \
-	$(NSS)/pk11wrap/dev3hack.c \
-	$(NSS)/pk11wrap/pk11akey.c \
-	$(NSS)/pk11wrap/pk11auth.c \
-	$(NSS)/pk11wrap/pk11cert.c \
-	$(NSS)/pk11wrap/pk11cxt.c \
-	$(NSS)/pk11wrap/pk11err.c  \
-	$(NSS)/pk11wrap/pk11kea.c \
-	$(NSS)/pk11wrap/pk11list.c \
-	$(NSS)/pk11wrap/pk11load.c \
-	$(NSS)/pk11wrap/pk11mech.c \
-	$(NSS)/pk11wrap/pk11merge.c \
-	$(NSS)/pk11wrap/pk11nobj.c \
-	$(NSS)/pk11wrap/pk11obj.c \
-	$(NSS)/pk11wrap/pk11pars.c \
-	$(NSS)/pk11wrap/pk11pbe.c \
-	$(NSS)/pk11wrap/pk11pk12.c \
-	$(NSS)/pk11wrap/pk11pqg.c \
-	$(NSS)/pk11wrap/pk11sdr.c \
-	$(NSS)/pk11wrap/pk11skey.c \
-	$(NSS)/pk11wrap/pk11slot.c \
-	$(NSS)/pk11wrap/pk11util.c \
-	$(NSS)/cryptohi/sechash.c \
-	$(NSS)/cryptohi/seckey.c  \
-	$(NSS)/cryptohi/secsign.c \
-	$(NSS)/cryptohi/secvfy.c  \
-	$(NSS)/cryptohi/dsautil.c \
-	$(NSS)/nss/nssinit.c \
-	$(NSS)/nss/nssver.c \
-	$(NSS)/nss/utilwrap.c \
-	$(NSS)/pkcs12/p12local.c \
-        $(NSS)/pkcs12/p12creat.c \
-        $(NSS)/pkcs12/p12dec.c \
-        $(NSS)/pkcs12/p12plcy.c \
-        $(NSS)/pkcs12/p12tmpl.c \
-        $(NSS)/pkcs12/p12e.c \
-        $(NSS)/pkcs12/p12d.c \
-	$(NSS)/pkcs7/certread.c \
-	$(NSS)/pkcs7/p7common.c \
-	$(NSS)/pkcs7/p7create.c \
-	$(NSS)/pkcs7/p7decode.c \
-	$(NSS)/pkcs7/p7encode.c \
-	$(NSS)/pkcs7/p7local.c  \
-	$(NSS)/pkcs7/secmime.c  \
-	$(NSS)/smime/cmsarray.c \
-	$(NSS)/smime/cmsasn1.c \
-	$(NSS)/smime/cmsattr.c \
-	$(NSS)/smime/cmscinfo.c \
-	$(NSS)/smime/cmscipher.c \
-	$(NSS)/smime/cmsdecode.c \
-	$(NSS)/smime/cmsdigdata.c \
-	$(NSS)/smime/cmsdigest.c \
-	$(NSS)/smime/cmsencdata.c \
-	$(NSS)/smime/cmsencode.c \
-	$(NSS)/smime/cmsenvdata.c \
-	$(NSS)/smime/cmsmessage.c \
-	$(NSS)/smime/cmspubkey.c \
-	$(NSS)/smime/cmsrecinfo.c \
-	$(NSS)/smime/cmsreclist.c \
-	$(NSS)/smime/cmssigdata.c \
-	$(NSS)/smime/cmssiginfo.c \
-	$(NSS)/smime/cmsudf.c \
-	$(NSS)/smime/cmsutil.c \
-	$(NSS)/smime/smimemessage.c \
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_cert.c			\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_certpolicyinfo.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_certpolicymap.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_certpolicyqualifier.c	\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_crl.c			\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_crldp.c			\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_crlentry.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_date.c			\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_generalname.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_infoaccess.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_nameconstraints.c	\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_ocsprequest.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_ocspresponse.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_publickey.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_x500name.c		\
+	$(NSS)/libpkix/pkix_pl_nss/pki/pkix_pl_ocspcertid.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_bigint.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_bytearray.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_common.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_error.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_hashtable.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_lifecycle.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_mem.c			\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_monitorlock.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_mutex.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_object.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_oid.c			\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_primhash.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_rwlock.c		\
+	$(NSS)/libpkix/pkix_pl_nss/system/pkix_pl_string.c		\
+	$(NSS)/certdb/alg1485.c						\
+	$(NSS)/certdb/certdb.c						\
+	$(NSS)/certdb/certv3.c						\
+	$(NSS)/certdb/certxutl.c					\
+	$(NSS)/certdb/crl.c						\
+	$(NSS)/certdb/genname.c						\
+	$(NSS)/certdb/stanpcertdb.c					\
+	$(NSS)/certdb/polcyxtn.c					\
+	$(NSS)/certdb/secname.c						\
+	$(NSS)/certdb/xauthkid.c					\
+	$(NSS)/certdb/xbsconst.c					\
+	$(NSS)/certdb/xconst.c						\
+	$(NSS)/certhigh/certhtml.c					\
+	$(NSS)/certhigh/certreq.c					\
+	$(NSS)/certhigh/crlv2.c						\
+	$(NSS)/certhigh/ocsp.c						\
+	$(NSS)/certhigh/ocspsig.c					\
+	$(NSS)/certhigh/certhigh.c					\
+	$(NSS)/certhigh/certvfy.c					\
+	$(NSS)/certhigh/certvfypkix.c					\
+	$(NSS)/certhigh/certvfypkixprint.c				\
+	$(NSS)/certhigh/xcrldist.c					\
+	$(NSS)/pk11wrap/dev3hack.c					\
+	$(NSS)/pk11wrap/pk11akey.c					\
+	$(NSS)/pk11wrap/pk11auth.c					\
+	$(NSS)/pk11wrap/pk11cert.c					\
+	$(NSS)/pk11wrap/pk11cxt.c					\
+	$(NSS)/pk11wrap/pk11err.c 					\
+	$(NSS)/pk11wrap/pk11kea.c					\
+	$(NSS)/pk11wrap/pk11list.c					\
+	$(NSS)/pk11wrap/pk11load.c					\
+	$(NSS)/pk11wrap/pk11mech.c					\
+	$(NSS)/pk11wrap/pk11merge.c					\
+	$(NSS)/pk11wrap/pk11nobj.c					\
+	$(NSS)/pk11wrap/pk11obj.c					\
+	$(NSS)/pk11wrap/pk11pars.c					\
+	$(NSS)/pk11wrap/pk11pbe.c					\
+	$(NSS)/pk11wrap/pk11pk12.c					\
+	$(NSS)/pk11wrap/pk11pqg.c					\
+	$(NSS)/pk11wrap/pk11sdr.c					\
+	$(NSS)/pk11wrap/pk11skey.c					\
+	$(NSS)/pk11wrap/pk11slot.c					\
+	$(NSS)/pk11wrap/pk11util.c					\
+	$(NSS)/cryptohi/sechash.c					\
+	$(NSS)/cryptohi/seckey.c					\
+	$(NSS)/cryptohi/secsign.c					\
+	$(NSS)/cryptohi/secvfy.c					\
+	$(NSS)/cryptohi/dsautil.c					\
+	$(NSS)/nss/nssinit.c						\
+	$(NSS)/nss/nssver.c						\
+	$(NSS)/nss/utilwrap.c						\
+	$(NSS)/pkcs12/p12local.c					\
+        $(NSS)/pkcs12/p12creat.c					\
+        $(NSS)/pkcs12/p12dec.c						\
+        $(NSS)/pkcs12/p12plcy.c						\
+        $(NSS)/pkcs12/p12tmpl.c						\
+        $(NSS)/pkcs12/p12e.c						\
+        $(NSS)/pkcs12/p12d.c						\
+	$(NSS)/pkcs7/certread.c						\
+	$(NSS)/pkcs7/p7common.c						\
+	$(NSS)/pkcs7/p7create.c						\
+	$(NSS)/pkcs7/p7decode.c						\
+	$(NSS)/pkcs7/p7encode.c						\
+	$(NSS)/pkcs7/p7local.c						\
+	$(NSS)/pkcs7/secmime.c						\
+	$(NSS)/smime/cmsarray.c						\
+	$(NSS)/smime/cmsasn1.c						\
+	$(NSS)/smime/cmsattr.c						\
+	$(NSS)/smime/cmscinfo.c						\
+	$(NSS)/smime/cmscipher.c					\
+	$(NSS)/smime/cmsdecode.c					\
+	$(NSS)/smime/cmsdigdata.c					\
+	$(NSS)/smime/cmsdigest.c					\
+	$(NSS)/smime/cmsencdata.c					\
+	$(NSS)/smime/cmsencode.c					\
+	$(NSS)/smime/cmsenvdata.c					\
+	$(NSS)/smime/cmsmessage.c					\
+	$(NSS)/smime/cmspubkey.c					\
+	$(NSS)/smime/cmsrecinfo.c					\
+	$(NSS)/smime/cmsreclist.c					\
+	$(NSS)/smime/cmssigdata.c					\
+	$(NSS)/smime/cmssiginfo.c					\
+	$(NSS)/smime/cmsudf.c						\
+	$(NSS)/smime/cmsutil.c						\
+	$(NSS)/smime/smimemessage.c					\
 	$(NSS)/smime/smimeutil.c \
 	$(NSS)/smime/smimever.c \
 	$(NSS)/crmf/crmfenc.c \
@@ -424,7 +429,7 @@ endif # NSS_USE_SYSTEM_SQLITE
 
 LOCAL_SHARED_LIBRARIES += 			\
 	nssutil$(NSSUTIL_SHLIB_VERSION)		\
-	nspr$(NSPR_SHLIB_VERSION)		\
+	$(NSPR_SHARED_LIBRARIES)		\
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -434,14 +439,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := nssutil$(NSSUTIL_SHLIB_VERSION)
 
-LOCAL_CFLAGS += -DUSE_UTIL_DIRECTLY
+LOCAL_CFLAGS += -DUSE_UTIL_DIRECTLY $(NSPR_CFLAGS)
+LOCAL_LDLIBS += $(NSPR_LIBS)
 
 LOCAL_C_INCLUDES :=					\
-	.						\
-	include/nspr					\
-	external/nspr/lib/ds				\
-	external/nspr/lib/libc/include			\
-	external/nspr/pr/include			\
+	$(NSPR_C_INCLUDES)				\
 
 LOCAL_SRC_FILES :=					\
 	$(NSS)/util/quickder.c				\
@@ -471,7 +473,8 @@ LOCAL_SRC_FILES :=					\
 	$(NSS)/util/utilmod.c				\
 	$(NSS)/util/utilpars.c				\
 
-LOCAL_SHARED_LIBRARIES := nspr$(NSPR_SHLIB_VERSION)
+LOCAL_SHARED_LIBRARIES := 				\
+	$(NSPR_SHARED_LIBRARIES)			\
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -484,11 +487,7 @@ LOCAL_MODULE := softokn$(SOFTOKEN_SHLIB_VERSION)
 SOFTOKEN := external/nss/lib/softoken
 
 LOCAL_C_INCLUDES :=				\
-	.					\
-	include/nspr				\
-	external/nspr/pr/include/		\
-	external/nspr/lib/ds			\
-	external/nspr/lib/libc/include		\
+	$(NSPR_C_INCLUDES)			\
 	external/nss/lib/freebl			\
 	external/nss/lib/freebl/ecl		\
 	external/nss/lib/util			\
@@ -507,6 +506,9 @@ LOCAL_CFLAGS :=						\
 	-DSHLIB_PREFIX=\"lib\"				\
 	-DSHLIB_SUFFIX=\"so\"				\
 	-DSHLIB_VERSION=\"3\"				\
+	$(NSPR_CFLAGS)					\
+
+LOCAL_LDLIBS += $(NSPR_LIBS)
 
 LOCAL_SRC_FILES :=				\
 	$(SOFTOKEN)/fipsaudt.c			\
@@ -539,17 +541,14 @@ include $(BUILD_SHARED_LIBRARY)
 ##################################### FREEBL #################################
 
 FREEBL_C_INCLUDES :=					\
-	.						\
-	include/nspr					\
-	external/nspr/pr/include			\
-	external/nspr/lib/ds				\
-	external/nspr/lib/libc/include			\
+	$(NSPR_C_INCLUDES)				\
 	external/nss/lib/freebl/ecl			\
 	external/nss/lib/freebl/mpi			\
 	external/nss/lib/softoken			\
 	external/nss/lib/util				\
 
 FREEBL_CFLAGS +=						\
+	$(NSPR_CFLAGS)						\
 	-fPIC							\
 	-DRIJNDAEL_INCLUDE_TABLES				\
 	-DMP_API_COMPATIBLE					\
@@ -559,6 +558,8 @@ FREEBL_CFLAGS +=						\
 	-DSHLIB_VERSION=\"$(FREEBL_SHLIB_VERSION)\"		\
 
 FREEBL_CFLAGS += -DNSS_USE_64 # FIXME
+
+FREEBL_LDLIBS += $(NSPR_LIBS)
 
 FREEBL_SRC_FILES :=					\
 	$(NSS)/freebl/freeblver.c			\
@@ -649,6 +650,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE     := freebl$(FREEBL_SHLIB_VERSION)
 LOCAL_C_INCLUDES := $(FREEBL_C_INCLUDES)
 LOCAL_CFLAGS     := $(FREEBL_CFLAGS)
+LOCAL_LDLIBS     := $(FREEBL_LDLIBS)
 LOCAL_SRC_FILES  := $(FREEBL_SRC_FILES)
 include $(BUILD_SHARED_LIBRARY)
 
@@ -661,11 +663,7 @@ LOCAL_MODULE := nssdbm$(NSSDBM_SHLIB_VERSION)
 NSS_DBM := external/nss/lib/softoken/legacydb
 
 LOCAL_C_INCLUDES +=					\
-	.						\
-	include/nspr					\
-	external/nspr/pr/include			\
-	external/nspr/lib/ds				\
-	external/nspr/lib/libc/include			\
+	$(NSPR_C_INCLUDES)				\
 	external/nss/lib/dbm/include			\
 	external/nss/lib/freebl				\
 	external/nss/lib/freebl/ecl			\
@@ -673,8 +671,11 @@ LOCAL_C_INCLUDES +=					\
 	external/nss/lib/util				\
 
 LOCAL_CFLAGS +=						\
+	$(NSPR_CFLAGS)					\
 	-DSHLIB_PREFIX=\"$(SHLIB_PREFIX)\"		\
 	-DSHLIB_SUFFIX=\"$(SHLIB_SUFFIX)\"		\
+
+LOCAL_LDLIBS += $(NSPR_LIBS)
 
 LOCAL_SRC_FILES +=					\
 	$(NSS_DBM)/dbmshim.c				\
@@ -723,12 +724,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := ssl$(SSL_SHLIB_VERSION)
 
+LOCAL_CFLAGS := $(NSPR_CFLAGS)
+LOCAL_LDLIBS += $(NSPR_LIBS)
+
 LOCAL_C_INCLUDES :=					\
-	.						\
-	include/nspr					\
-	external/nspr/lib/ds				\
-	external/nspr/lib/libc/include			\
-	external/nspr/pr/include			\
+	$(NSPR_C_INCLUDES)				\
 	external/nss/lib/certdb				\
 	external/nss/lib/certhigh			\
 	external/nss/lib/cryptohi			\
@@ -770,5 +770,7 @@ LOCAL_SRC_FILES :=					\
 	$(NSS)/ssl/unix_err.c				\
 
 include $(BUILD_SHARED_LIBRARY)
+
+endif # WITH_SYSTEM_NSS
 
 ##############################################################################

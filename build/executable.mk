@@ -36,5 +36,7 @@ $(module)_deps:=					\
 $(module): module:=$(module)
 $(module): $($(module)_deps)
 	@echo LD $(module)
-	$(Q) $(CC) -rdynamic -o $@ $($(module)_o_files) $($(module)_ld_flags)
+	$(Q) $(CC) -rdynamic -o $@ $($(module)_o_files)	\
+		$($(module)_ld_flags)			\
+		$($(module)_ldlibs)			\
 

@@ -10,3 +10,5 @@ clean_targets := $(clean_targets) $($(module)_o_files)
 
 $(module)_cflags := $(sys_cflags) $(LOCAL_CFLAGS) $(LOCAL_C_INCLUDES:%=-I%)
 
+$(module)_ldlibs := $(LOCAL_LDLIBS)
+

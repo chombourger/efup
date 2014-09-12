@@ -9,9 +9,15 @@ CFLAGS   = @CFLAGS@
 CPP      = @CPP@
 CPPFLAGS = @CPPFLAGS@
 
+NSPR_CFLAGS = @NSPR_CFLAGS@
+NSPR_LIBS   = @NSPR_LIBS@
+
+NSS_CFLAGS = @NSS_CFLAGS@
+NSS_LIBS   = @NSS_LIBS@
+
 include main.mk
 
 .PHONY: distclean
 
 distclean: clean
-	rm -f config.log config.status Makefile configure
+	@rm -rf config.log config.status Makefile configure autom4te.cache aclocal.m4

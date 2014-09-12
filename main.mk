@@ -4,6 +4,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
+ifdef NSPR_LIBS
+WITH_SYSTEM_NSPR:=1
+endif
+
+ifdef NSS_LIBS
+WITH_SYSTEM_NSS:=1
+endif
+
 include build/build.mk
 
 LOCAL_PATH := .

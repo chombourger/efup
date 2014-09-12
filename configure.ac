@@ -14,6 +14,10 @@ AC_PROG_CPP
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+# Check for NSPR & NSS
+AM_PATH_NSPR
+AM_PATH_NSS
+
 # Checks for libraries.
 
 # Checks for header files.

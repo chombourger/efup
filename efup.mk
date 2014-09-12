@@ -7,13 +7,46 @@
 SHLIB_PREFIX=lib
 SHLIB_SUFFIX=so
 
-FREEBL_SHLIB_VERSION=3
+ifndef WITH_SYSTEM_NSPR
+
 NSPR_SHLIB_VERSION=4
+
+NSPR_C_INCLUDES :=			\
+	.				\
+	include/nspr			\
+	external/nspr/pr/include	\
+	external/nspr/lib/ds		\
+	external/nspr/lib/libc/include	\
+
+NSPR_SHARED_LIBRARIES :=		\
+	nspr$(NSPR_SHLIB_VERSION)	\
+	pthread dl			\
+
+endif # WITH_SYSTEM_NSPR
+
+ifndef WITH_SYSTEM_NSS
+
+FREEBL_SHLIB_VERSION=3
 NSS_SHLIB_VERSION=3
 NSSDBM_SHLIB_VERSION=3
 NSSUTIL_SHLIB_VERSION=3
 SOFTOKEN_SHLIB_VERSION=3
 SSL_SHLIB_VERSION=3
+
+NSS_C_INCLUDES :=			\
+	external/nss/lib/certdb		\
+	external/nss/lib/cryptohi	\
+	external/nss/lib/nss		\
+	external/nss/lib/pk11wrap	\
+	external/nss/lib/smime		\
+	external/nss/lib/util		\
+
+NSS_SHARED_LIBRARIES :=			\
+	nss$(NSS_SHLIB_VERSION)		\
+	nssutil$(NSSUTIL_SHLIB_VERSION)	\
+	freebl$(FREEBL_SHLIB_VERSION)	\
+
+endif
 
 ##############################################################################
 
@@ -24,17 +57,9 @@ LOCAL_C_INCLUDES += 			\
 	.				\
 	include				\
 	include/libzip			\
-	include/nspr			\
 	external/lua/src		\
-	external/nspr/pr/include	\
-	external/nspr/lib/ds		\
-	external/nspr/lib/libc/include	\
-	external/nss/lib/certdb		\
-	external/nss/lib/cryptohi	\
-	external/nss/lib/nss		\
-	external/nss/lib/pk11wrap	\
-	external/nss/lib/smime		\
-	external/nss/lib/util		\
+	$(NSS_C_INCLUDES)		\
+	$(NSPR_C_INCLUDES)		\
 
 LOCAL_SRC_FILES +=			\
 	src/extract.c			\
@@ -51,16 +76,15 @@ LOCAL_SRC_FILES +=			\
 	src/verifier/nss.c		\
 	src/volume.c			\
 
-LOCAL_CFLAGS += -Wall
+LOCAL_CFLAGS += -Wall $(NSS_CFLAGS) $(NSPR_CFLAGS)
+LOCAL_LDLIBS += $(NSS_LIBS) $(NSPR_LIBS)
 
 LOCAL_STATIC_LIBRARIES += lua zip
 
 LOCAL_SHARED_LIBRARIES :=		\
-	nss$(NSS_SHLIB_VERSION)		\
-	nssutil$(NSSUTIL_SHLIB_VERSION)	\
-	freebl$(FREEBL_SHLIB_VERSION)	\
-	nspr$(NSPR_SHLIB_VERSION)	\
-	dl m rt z
+	$(NSS_SHARED_LIBRARIES)		\
+	$(NSPR_SHARED_LIBRARIES)	\
+	m rt z
 
 include $(BUILD_EXECUTABLE)
 

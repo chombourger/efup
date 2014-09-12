@@ -17,12 +17,13 @@ Building
 
 The following development headers and libaries are required:
 
+   - nspr (will be built if not found)
+   - nss (will be built if not found)
    - zlib
 
 EFUP may then be built with:
 
-   autoconf -i
-   ./configure
+   ./autogen.sh && ./configure
    make
 
 Scripting commands
@@ -106,6 +107,10 @@ and verified with:
 
 Implementation Notes
 --------------------
+
+The NSPR and NSS libraries are included in this source tree to support
+Android systems. When building for Linux, the autoconf script will check
+if they are found and otherwise build the in-tree versions.
 
 Signing messages with SMIME results in bytes being prepended and appended
 to the message. For zip files, the decompression code consequently needs
