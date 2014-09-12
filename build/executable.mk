@@ -22,11 +22,15 @@ $(module)_ustatic_libraries:=$(filter-out $(sys_libs),	\
 	$($(module)_static_libraries)			\
 )
 
-$(module)_ld_flags:=					\
+$(module)_ldflags:=					\
+	$(sys_ldflags)					\
 	-L.						\
 	-Lout						\
+
+$(module)_ldlibs:=					\
+	$(sys_ldlibs)					\
 	$($(module)_static_libraries:%=-l%)		\
-	$($(module)_shared_libraries:%=-l%)
+	$($(module)_shared_libraries:%=-l%)		\
 
 $(module)_deps:=					\
 	$($(module)_o_files)				\
@@ -36,7 +40,9 @@ $(module)_deps:=					\
 $(module): module:=$(module)
 $(module): $($(module)_deps)
 	@echo LD $(module)
-	$(Q) $(CC) -rdynamic -o $@ $($(module)_o_files)	\
-		$($(module)_ld_flags)			\
+	$(Q) $(CC) -rdynamic -o $@			\
+		$($(module)_cflags)			\
+		$($(module)_o_files)			\
+		$($(module)_ldflags)			\
 		$($(module)_ldlibs)			\
 

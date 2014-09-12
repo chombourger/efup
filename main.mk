@@ -16,8 +16,10 @@ include build/build.mk
 
 LOCAL_PATH := .
 
-sys_cflags := $(CFLAGS)
-sys_libs   := dl m pthread rt z
+sys_cflags   := $(CFLAGS)
+sys_cppflags := $(CPPFLAGS)
+sys_ldflags  := $(LDFLAGS)
+sys_libs     := dl m pthread rt z
 
 .PHONY: all
 all: build

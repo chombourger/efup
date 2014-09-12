@@ -8,7 +8,9 @@ $(module)_o_files := $($(module)_c_files:%.c=out/%.o) $($(module)_s_files:%.s=ou
 
 clean_targets := $(clean_targets) $($(module)_o_files)
 
-$(module)_cflags := $(sys_cflags) $(LOCAL_CFLAGS) $(LOCAL_C_INCLUDES:%=-I%)
+$(module)_cflags   := $(sys_cflags) $(LOCAL_CFLAGS)
+$(module)_cppflags := $(sys_cppflags) $(LOCAL_CPPFLAGS) $(LOCAL_C_INCLUDES:%=-I%)
 
-$(module)_ldlibs := $(LOCAL_LDLIBS)
+$(module)_ldflags  := $(sys_ldflags) $(LOCAL_LDFLAGS)
+$(module)_ldlibs   := $(sys_ldlibs) $(LOCAL_LDLIBS)
 

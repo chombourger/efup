@@ -12,10 +12,15 @@ ifndef V
 Q=@
 endif
 
+%.o: %.c
+	@echo CC $<
+	$(Q) mkdir -p $(dir $@)
+	$(Q) $(CC) $($(module)_cflags) $($(module)_cppflags) -c $< -o $@
+
 out/%.o: %.c
 	@echo CC $<
 	$(Q) mkdir -p $(dir $@)
-	$(Q) $(CC) $($(module)_cflags) -c $< -o $@
+	$(Q) $(CC) $($(module)_cflags) $($(module)_cppflags) -c $< -o $@
 
 out/%.o: %.s
 	@echo AS $<

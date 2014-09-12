@@ -5,19 +5,29 @@
 ##############################################################################
 
 ifndef MACHINE
+ifeq ($(HOST_CPU),arm)
+MACHINE:=arm
+endif
+ifeq ($(HOST_CPU),i686)
+MACHINE:=x86
+endif
 ifeq ($(HOST_CPU),x86_64)
 MACHINE:=x86_64
+NSS_USE_64:=1
 endif
 endif
 
 ifdef MACHINE
 $(MACHINE):=1
 else
-$(error could not determine target machine!)
+$(error could not determine target machine (HOST_CPU=$(HOST_CPU))!)
 endif
 
 ifndef SYSTEM
 ifeq ($(HOST_OS),linux-gnu)
+SYSTEM:=Linux
+endif
+ifeq ($(HOST_OS),linux-gnueabi)
 SYSTEM:=Linux
 endif
 endif
@@ -25,7 +35,7 @@ endif
 ifdef SYSTEM
 $(SYSTEM):=1
 else
-$(error could not determine target system!)
+$(error could not determine target system (HOST_OS=$(HOST_OS))!)
 endif
 
 ###################################### NSPR ##################################
@@ -189,7 +199,7 @@ LOCAL_CFLAGS += -DSOFTOKEN_LIB_NAME=\"softtoken\"
 LOCAL_CFLAGS += -DSOFTOKEN_SHLIB_VERSION=\"$(SOFTOKEN_SHLIB_VERSION)\"
 LOCAL_CFLAGS += -DSHLIB_VERSION=\"$(SOFTOKEN_SHLIB_VERSION)\"
 
-LOCAL_CFLAGS += -DNSS_USE_64 # FIXME
+LOCAL_CFLAGS += $(NSS_USE_64:%=-DNSS_USE_64)
 LOCAL_CFLAGS += -DUSE_UTIL_DIRECTLY
 LOCAL_CFLAGS += -DMOZILLA_CLIENT
 LOCAL_CFLAGS += -DNSS_PKIX_NO_LDAP
@@ -535,6 +545,7 @@ LOCAL_STATIC_LIBRARIES +=			\
 
 LOCAL_SHARED_LIBRARIES +=			\
 	nssutil$(NSSUTIL_SHLIB_VERSION)		\
+	$(NSPR_SHARED_LIBRARIES)		\
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -556,8 +567,7 @@ FREEBL_CFLAGS +=						\
 	-DSHLIB_SUFFIX=\"$(SHLIB_SUFFIX)\"			\
 	-DSOFTOKEN_SHLIB_VERSION=\"$(SOFTOKEN_SHLIB_VERSION)\"	\
 	-DSHLIB_VERSION=\"$(FREEBL_SHLIB_VERSION)\"		\
-
-FREEBL_CFLAGS += -DNSS_USE_64 # FIXME
+	$(NSS_USE_64:%=-DNSS_USE_64)				\
 
 FREEBL_LDLIBS += $(NSPR_LIBS)
 
@@ -718,14 +728,13 @@ LOCAL_SHARED_LIBRARIES +=				\
 
 include $(BUILD_SHARED_LIBRARY)
 
-##############################################################################
+##################################### SSL ####################################
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := ssl$(SSL_SHLIB_VERSION)
 
 LOCAL_CFLAGS := $(NSPR_CFLAGS)
-LOCAL_LDLIBS += $(NSPR_LIBS)
 
 LOCAL_C_INCLUDES :=					\
 	$(NSPR_C_INCLUDES)				\
@@ -768,6 +777,50 @@ LOCAL_SRC_FILES :=					\
 	$(NSS)/ssl/sslinfo.c				\
 	$(NSS)/ssl/ssl3ecc.c				\
 	$(NSS)/ssl/unix_err.c				\
+
+LOCAL_LDLIBS += $(NSPR_LIBS)
+LOCAL_SHARED_LIBRARIES += $(NSPR_SHARED_LIBRARIES)
+
+include $(BUILD_SHARED_LIBRARY)
+
+################################### NSSCKBI ##################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := nssckbi
+
+LOCAL_CFLAGS := $(NSPR_CFLAGS)
+
+LOCAL_C_INCLUDES :=				\
+	$(NSPR_C_INCLUDES)			\
+	external/nss/lib/base			\
+	external/nss/lib/ckfw/builtins		\
+	external/nss/lib/ckfw			\
+	external/nss/lib/util			\
+
+LOCAL_SRC_FILES :=				\
+	$(NSS)/ckfw/builtins/anchor.c		\
+	$(NSS)/ckfw/builtins/constants.c	\
+        $(NSS)/ckfw/builtins/bfind.c		\
+        $(NSS)/ckfw/builtins/binst.c		\
+        $(NSS)/ckfw/builtins/bobject.c		\
+        $(NSS)/ckfw/builtins/bsession.c		\
+        $(NSS)/ckfw/builtins/bslot.c		\
+        $(NSS)/ckfw/builtins/btoken.c		\
+        $(NSS)/ckfw/builtins/certdata.c		\
+        $(NSS)/ckfw/builtins/ckbiver.c		\
+
+LOCAL_LDLIBS += $(NSPR_LIBS)
+LOCAL_SHARED_LIBRARIES += $(NSPR_SHARED_LIBRARIES)
+
+NSS_CERTDATA_PERL = $(NSS)/ckfw/builtins/certdata.perl
+NSS_CERTDATA_TXT  = $(NSS)/ckfw/builtins/certdata.txt
+
+out/$(NSS)/ckfw/builtins/certdata.c:	\
+	$(NSS_CERTDATA_PERL)		\
+	$(NSS_CERTDATA_TXT)		\
+
+	$(PERL) $(NSS_CERTDATA_PERL) < $(NSS_CERTDATA_TXT) > $@
 
 include $(BUILD_SHARED_LIBRARY)
 

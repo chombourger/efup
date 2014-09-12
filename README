@@ -12,8 +12,8 @@ update keys (if only trusted update files should be loaded).
 Update scripts may be created using the LUA scripting language (and APIs)
 and scripting commands described in this document.
 
-Building
---------
+Compiling
+---------
 
 The following development headers and libaries are required:
 
@@ -25,6 +25,19 @@ EFUP may then be built with:
 
    ./autogen.sh && ./configure
    make
+
+Cross-compiling
+---------------
+
+EFUP may be crossed-compiled for an embedded Linux system as follows:
+
+   export CFLAGS='-march=armv7-a -mthumb-interwork -mfloat-abi=hard \
+       -mfpu=neon -mtune=cortex-a9 -mno-unaligned-access            \
+       --sysroot=$TARGET_SYSROOT -g -O'
+   ./autogen.sh && ./configure --host=arm-none-linux-gnueabi
+   make
+
+with CFLAGS and --host set for your platform.
 
 Scripting commands
 ------------------
