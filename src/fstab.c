@@ -45,6 +45,11 @@ fstab_parse(const char *path, volume_list_t *list) {
             freq         = strtok(NULL, " \t");
             passno       = strtok(NULL, " \t");
 
+            /* Kill warnings about variables set but unused. */
+            mountOptions = mountOptions;
+            freq         = freq;
+            passno       = passno;
+
             /* Allocate and initialize a new volume descriptor. */
             volume = volume_new();
             if (volume != NULL) {

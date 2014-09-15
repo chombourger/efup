@@ -93,14 +93,14 @@ verifier_feed(void *buf, size_t size) {
   */
 static int
 verify_signer (NSSCMSSignedData *datap, unsigned int signer) {
-   SECStatus status;
-   int result;
+    SECStatus status;
+    int result;
 
-   /* Get verification status. */
-   status = NSS_CMSSignedData_VerifySignerInfo(datap, signer, CERT_GetDefaultCertDB(), NSS_CERT_USAGE);
-   result = (status == SECSuccess) ? 0 : EIO;
+    /* Get verification status. */
+    status = NSS_CMSSignedData_VerifySignerInfo(datap, signer, CERT_GetDefaultCertDB(), NSS_CERT_USAGE);
+    result = (status == SECSuccess) ? 0 : EIO;
 
-   return result; 
+    return result; 
 }
 
 /**
@@ -113,23 +113,22 @@ verify_signer (NSSCMSSignedData *datap, unsigned int signer) {
   */
 static int
 verify_signers(NSSCMSSignedData *datap) {
-   unsigned int signers, signer;
-   SECStatus status;
-   int result;
+    unsigned int signers, signer;
+    SECStatus status;
+    int result = EINVAL;
 
-   status = NSS_CMSSignedData_ImportCerts(datap, CERT_GetDefaultCertDB(), NSS_CERT_USAGE, PR_TRUE);
-   if (status == SECSuccess) {
-      signers = NSS_CMSSignedData_SignerInfoCount(datap);
-      for (signer=0; signer<signers; signer++) {
-         result = verify_signer(datap, signer);
-         if (result != 0) break;
-      }
-   }
-   else result = EIO;
+    status = NSS_CMSSignedData_ImportCerts(datap, CERT_GetDefaultCertDB(), NSS_CERT_USAGE, PR_TRUE);
+    if (status == SECSuccess) {
+        signers = NSS_CMSSignedData_SignerInfoCount(datap);
+        for (signer=0; signer<signers; signer++) {
+            result = verify_signer(datap, signer);
+            if (result != 0) break;
+        }
+    }
+    else result = EIO;
 
-   return result;
+    return result;
 }
-
 
 /**
   * Check the message integrity and in particular certificates of the signer(s).
@@ -145,23 +144,24 @@ check_message (NSSCMSMessage *messagep) {
     NSSCMSSignedData *datap;
     NSSCMSContentInfo *infop;
     SECOidTag type;
-    int result;
+    int result = EINVAL;
 
-   if (NSS_CMSMessage_IsSigned(messagep)) {
-      level_count = NSS_CMSMessage_ContentLevelCount(messagep);
-      for (i = 0; i < level_count; i++) {
+    if (NSS_CMSMessage_IsSigned(messagep)) {
+        level_count = NSS_CMSMessage_ContentLevelCount(messagep);
+        for (i = 0; i < level_count; i++) {
 
-         infop = NSS_CMSMessage_ContentLevel(messagep, i);
-         type  = NSS_CMSContentInfo_GetContentTypeTag(infop);
+            infop = NSS_CMSMessage_ContentLevel(messagep, i);
+            type  = NSS_CMSContentInfo_GetContentTypeTag(infop);
 
-         if (type == SEC_OID_PKCS7_SIGNED_DATA) {
-            datap = (NSSCMSSignedData *) NSS_CMSContentInfo_GetContent(infop);
-            result = verify_signers(datap);
-            if (result != 0) break;
-         }
-      }
-   }
-   return result; 
+            if (type == SEC_OID_PKCS7_SIGNED_DATA) {
+                datap = (NSSCMSSignedData *) NSS_CMSContentInfo_GetContent(infop);
+                result = verify_signers(datap);
+                if (result != 0) break;
+            }
+        }
+    }
+
+    return result; 
 }
 
 int

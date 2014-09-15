@@ -51,7 +51,6 @@ main(int argc, char **argv) {
     error = scripting_load("efup.lua");
     verifier_destroy();
 
-destroy_scripting:
     /* Clean-up the scripting environment. */
     scripting_destroy();
 

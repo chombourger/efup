@@ -110,6 +110,7 @@ source_zip_verify(source_t *sourcep) {
             }
             fclose(filep);
         }
+        else result = errno;
     }
     else result = EBADF;
 

@@ -52,6 +52,13 @@ mtab_parse(const char *path, volume_list_t *list) {
             freq         = strtok(NULL, " \t");
             passno       = strtok(NULL, " \t");
 
+            /* Kill warnings about variables set but unused. */
+            spec         = spec;
+            fsType       = fsType;
+            mountOptions = mountOptions;
+            freq         = freq;
+            passno       = passno;
+
             /* Allocate and initialize a new volume descriptor. */
             volume = volume_list_lookup_by_mount_point(list, mountPoint);
             if (volume != NULL) {
