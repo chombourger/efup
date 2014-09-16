@@ -6,8 +6,9 @@ module:=$(LOCAL_MODULE)
 
 include build/objects.mk
 
-build_targets := $(build_targets) lib$(module).so
-clean_targets := $(clean_targets) lib$(module).so
+build_targets   := $(build_targets) lib$(module).so
+clean_targets   := $(clean_targets) lib$(module).so
+install_targets := $(install_targets) $(D)$(libdir)/lib$(module).so
 
 $(module)_cflags := $($(module)_cflags) -fPIC
 
@@ -40,9 +41,14 @@ $(module)_deps:=					\
 lib$(module).so: module:=$(module)
 lib$(module).so: $($(module)_deps)
 	@echo LD $(module)
+	echo deps $^
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(CC) -shared -o $@				\
 		$($(module)_cflags)				\
 		$($(module)_o_files) $($(module)_ldflags)	\
 		$($(module)_ldlibs)				\
+
+$(D)$(libdir)/lib$(module).so: lib$(module).so
+	$(MKDIR_P) $(dir $@)
+	install -m 755 $< $@
 

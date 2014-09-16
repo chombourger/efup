@@ -2,9 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-CLEAR_VARS := build/clear_vars.mk
-
-BUILD_EXECUTABLE := build/executable.mk
+CLEAR_VARS           := build/clear_vars.mk
+BUILD_EXECUTABLE     := build/executable.mk
 BUILD_SHARED_LIBRARY := build/shared_library.mk
 BUILD_STATIC_LIBRARY := build/static_library.mk
 

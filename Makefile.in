@@ -1,6 +1,11 @@
 
 @SET_MAKE@
 
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+libdir      = @libdir@
+sbindir     = @sbindir@
+
 HOST_CPU = @HOST_CPU@
 HOST_OS  = @HOST_OS@
 
@@ -15,7 +20,9 @@ NSPR_LIBS   = @NSPR_LIBS@
 NSS_CFLAGS = @NSS_CFLAGS@
 NSS_LIBS   = @NSS_LIBS@
 
-PERL = @PERL@
+INSTALL = @INSTALL@
+MKDIR_P = @MKDIR_P@
+PERL    = @PERL@
 
 include main.mk
 

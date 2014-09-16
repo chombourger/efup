@@ -35,3 +35,6 @@ build: $(build_targets)
 clean:
 	$(Q) rm -f $(clean_targets)
 
+.PHONY: install
+install: $(install_targets)
+
