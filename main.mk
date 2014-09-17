@@ -4,6 +4,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
+ifdef LUA_INCLUDE
+WITH_SYSTEM_LUA:=1
+endif
+
 ifdef NSPR_LIBS
 WITH_SYSTEM_NSPR:=1
 endif

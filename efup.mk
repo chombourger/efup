@@ -7,6 +7,16 @@
 SHLIB_PREFIX=lib
 SHLIB_SUFFIX=so
 
+ifndef WITH_SYSTEM_LUA
+
+LUA_C_INCLUDES :=			\
+	external/lua/src		\
+
+LUA_STATIC_LIBRARIES :=			\
+	lua
+
+endif
+
 ifndef WITH_SYSTEM_NSPR
 
 NSPR_SHLIB_VERSION=4
@@ -57,7 +67,7 @@ LOCAL_C_INCLUDES += 			\
 	.				\
 	include				\
 	include/libzip			\
-	external/lua/src		\
+	$(LUA_C_INCLUDES)		\
 	$(NSS_C_INCLUDES)		\
 	$(NSPR_C_INCLUDES)		\
 
@@ -76,10 +86,10 @@ LOCAL_SRC_FILES +=			\
 	src/verifier/nss.c		\
 	src/volume.c			\
 
-LOCAL_CFLAGS += -Wall $(NSS_CFLAGS) $(NSPR_CFLAGS)
-LOCAL_LDLIBS += $(NSS_LIBS) $(NSPR_LIBS)
+LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS)
+LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS)
 
-LOCAL_STATIC_LIBRARIES += lua zip
+LOCAL_STATIC_LIBRARIES += $(LUA_STATIC_LIBRARIES) zip
 
 LOCAL_SHARED_LIBRARIES :=		\
 	$(NSS_SHARED_LIBRARIES)		\
@@ -87,52 +97,6 @@ LOCAL_SHARED_LIBRARIES :=		\
 	m rt z
 
 include $(BUILD_EXECUTABLE)
-
-###################################### LUA ###################################
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := lua
-
-LUA = $(LOCAL_PATH)/external/lua/src
-
-LOCAL_CFLAGS += -DLUA_COMPAT_ALL -DLUA_USE_POSIX
-LOCAL_C_INCLUDES += $(LUA)
-
-LOCAL_SRC_FILES += 		\
-	$(LUA)/lapi.c		\
-	$(LUA)/lcode.c		\
-	$(LUA)/lctype.c		\
-	$(LUA)/ldebug.c		\
-	$(LUA)/ldo.c		\
-	$(LUA)/ldump.c		\
-	$(LUA)/lfunc.c		\
-	$(LUA)/lgc.c		\
-	$(LUA)/llex.c		\
-	$(LUA)/lmem.c		\
-	$(LUA)/lobject.c	\
-	$(LUA)/lopcodes.c	\
-	$(LUA)/lparser.c	\
-	$(LUA)/lstate.c		\
-	$(LUA)/lstring.c	\
-	$(LUA)/ltable.c		\
-	$(LUA)/ltm.c		\
-	$(LUA)/lundump.c	\
-	$(LUA)/lvm.c		\
-	$(LUA)/lzio.c		\
-	$(LUA)/lauxlib.c	\
-	$(LUA)/lbaselib.c	\
-	$(LUA)/lbitlib.c	\
-	$(LUA)/lcorolib.c	\
-	$(LUA)/ldblib.c		\
-	$(LUA)/liolib.c		\
-	$(LUA)/lmathlib.c	\
-	$(LUA)/loslib.c		\
-	$(LUA)/lstrlib.c	\
-	$(LUA)/ltablib.c	\
-	$(LUA)/loadlib.c	\
-	$(LUA)/linit.c		\
-
-include $(BUILD_STATIC_LIBRARY)
 
 ##################################### LIBZIP #################################
 
@@ -198,6 +162,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 ##############################################################################
 
+include lua.mk
 include nss.mk
 
 ##############################################################################
