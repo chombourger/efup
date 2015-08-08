@@ -5,6 +5,7 @@ configure
 config.log
 config.status
 efup
+external/freetype/builds/unix/ftconfig.h
 *.o
 *.so
 out

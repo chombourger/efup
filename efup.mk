@@ -164,5 +164,6 @@ include $(BUILD_STATIC_LIBRARY)
 
 include lua.mk
 include nss.mk
+include freetype.mk
 
 ##############################################################################

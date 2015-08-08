@@ -5,7 +5,9 @@ AC_PREREQ([2.61])
 AC_INIT(efup, 0.1, https://github.com/chombourger/efup)
 AC_CONFIG_MACRO_DIR([m4])
 # AC_CONFIG_SRCDIR([config.h.in])
-# AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([	\
+	external/freetype/builds/unix/ftconfig.h:external/freetype/builds/unix/ftconfig.in \
+])
 
 # Checks for programs.
 AC_PROG_AWK
