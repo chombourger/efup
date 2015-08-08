@@ -18,8 +18,8 @@ AC_PROG_MKDIR_P
 AC_PROG_PERL
 
 # Check for LUA
-AX_PROG_LUA(5.2)
-AX_LUA_HEADERS
+AC_SUBST([LUA_VERSION],5.2)
+AX_LUA_HEADERS(true,true)
 AX_LUA_LIBS(true,true)
 
 # Check for NSPR & NSS
