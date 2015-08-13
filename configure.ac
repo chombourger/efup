@@ -11,6 +11,9 @@ AC_CONFIG_HEADERS([	\
 	external/png/config.h:external/png/config.h.in \
 ])
 
+# Default to empty prefix (binaries going to /sbin and /lib)
+AC_PREFIX_DEFAULT()
+
 # Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
