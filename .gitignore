@@ -5,9 +5,15 @@ configure
 config.log
 config.status
 efup
+external/directfb/config.h
+external/directfb/include/directfb_build.h
+external/directfb/include/directfb_version.h
+external/directfb/lib/direct/build.h
+external/directfb/lib/fusion/build.h
 external/freetype/builds/unix/ftconfig.h
 external/jpeg/jconfig.h
 external/png/config.h
 *.o
 *.so
 out
+settings.mk

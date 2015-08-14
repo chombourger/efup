@@ -16,10 +16,20 @@ endif
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(CC) $($(module)_cflags) $($(module)_cppflags) -c $< -o $@
 
+%.o: %.cpp
+	@echo CC $<
+	$(Q) mkdir -p $(dir $@)
+	$(Q) $(CXX) $($(module)_cxxflags) $($(module)_cppflags) -c $< -o $@
+
 out/%.o: %.c
 	@echo CC $<
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(CC) $($(module)_cflags) $($(module)_cppflags) -c $< -o $@
+
+out/%.o: %.cpp
+	@echo CC $<
+	$(Q) mkdir -p $(dir $@)
+	$(Q) $(CXX) $($(module)_cxxflags) $($(module)_cppflags) -c $< -o $@
 
 out/%.o: %.s
 	@echo AS $<

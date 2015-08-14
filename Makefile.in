@@ -27,9 +27,24 @@ INSTALL = @INSTALL@
 MKDIR_P = @MKDIR_P@
 PERL    = @PERL@
 
+include settings.mk
 include main.mk
 
-.PHONY: distclean
+.PHONY: distclean force
 
 distclean: clean
 	@rm -rf config.log config.status Makefile configure autom4te.cache aclocal.m4
+
+force:
+
+initramfs: force
+	rm -rf initramfs
+	$(MKDIR_P) initramfs
+	$(MAKE) install D=$(PWD)/initramfs
+	(cd initramfs && ln -sf $(sbindir)/efup linuxrc)
+
+initramfs.cpio: initramfs
+	(cd initramfs && find . | cpio -R 0:0 -H newc -o > ../$@)
+
+initramfs.gz: initramfs.cpio
+	gzip -9 -c $< > $@

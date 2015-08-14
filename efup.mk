@@ -58,6 +58,17 @@ NSS_SHARED_LIBRARIES :=			\
 
 endif
 
+ifndef WITH_SYSTEM_DIRECTFB
+
+DFB_INCLUDES :=				\
+	external/directfb/include	\
+	external/directfb/lib
+
+DFB_STATIC_LIBRARIES :=			\
+	directfb
+	
+endif
+
 ##############################################################################
 
 include $(CLEAR_VARS)
@@ -70,6 +81,7 @@ LOCAL_C_INCLUDES += 			\
 	$(LUA_C_INCLUDES)		\
 	$(NSS_C_INCLUDES)		\
 	$(NSPR_C_INCLUDES)		\
+	$(DFB_INCLUDES)
 
 LOCAL_SRC_FILES +=			\
 	src/extract.c			\
@@ -83,13 +95,14 @@ LOCAL_SRC_FILES +=			\
 	src/source.c			\
 	src/source_local_folder.c	\
 	src/source_local_zip.c		\
+	src/ui/directfb.c		\
 	src/verifier/nss.c		\
 	src/volume.c			\
 
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS)
 LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS)
 
-LOCAL_STATIC_LIBRARIES += $(LUA_STATIC_LIBRARIES) zip
+LOCAL_STATIC_LIBRARIES += $(LUA_STATIC_LIBRARIES) zip $(DFB_STATIC_LIBRARIES)
 
 LOCAL_SHARED_LIBRARIES :=		\
 	$(NSS_SHARED_LIBRARIES)		\
@@ -167,5 +180,6 @@ include nss.mk
 include freetype.mk
 include jpeg.mk
 include png.mk
+include directfb.mk
 
 ##############################################################################
