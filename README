@@ -32,12 +32,14 @@ Cross-compiling
 EFUP may be crossed-compiled for an embedded Linux system as follows:
 
    export CFLAGS='-march=armv7-a -mthumb-interwork -mfloat-abi=hard \
-       -mfpu=neon -mtune=cortex-a9 -mno-unaligned-access            \
-       --sysroot=$TARGET_SYSROOT -g -O'
+       -mfpu=neon -mtune=cortex-a9 -mno-unaligned-access --sysroot=$SYSROOT -g -O'
+   export PKG_CONFIG_DIR=
+   export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
+   export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
    ./autogen.sh && ./configure --host=arm-none-linux-gnueabi
    make
 
-with CFLAGS and --host set for your platform.
+with SYSROOT, CFLAGS and --host set for your platform.
 
 Scripting commands
 ------------------

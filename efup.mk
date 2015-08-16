@@ -80,6 +80,15 @@ PNG_STATIC_LIBRARIES = png
 
 endif
 
+ifndef WITH_SYSTEM_ZLIB
+
+ZLIB_C_INCLUDES :=			\
+	external/zlib
+
+ZLIB_STATIC_LIBRARIES = z
+
+endif
+
 ##############################################################################
 
 include $(CLEAR_VARS)
@@ -111,19 +120,20 @@ LOCAL_SRC_FILES +=			\
 	src/volume.c			\
 
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS)
-LOCAL_LDFLAGS += $(LIBPNG_LDFLAGS)
-LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(LIBPNG_LDLIBS)
+LOCAL_LDFLAGS += $(LIBPNG_LDFLAGS) $(ZLIB_LDFLAGS)
+LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS8) $(LIBPNG_LDLIBS) $(ZLIB_LDLIBS)
 
 LOCAL_STATIC_LIBRARIES += 		\
 	$(LUA_STATIC_LIBRARIES)		\
 	zip				\
 	$(DFB_STATIC_LIBRARIES)		\
-	$(PNG_STATIC_LIBRARIES)
+	$(PNG_STATIC_LIBRARIES)		\
+	$(ZLIB_STATIC_LIBRARIES)
 
 LOCAL_SHARED_LIBRARIES :=		\
 	$(NSS_SHARED_LIBRARIES)		\
 	$(NSPR_SHARED_LIBRARIES)	\
-	m rt z
+	m rt
 
 include $(BUILD_EXECUTABLE)
 
@@ -134,7 +144,9 @@ LOCAL_MODULE := zip
 
 LIBZIP = $(LOCAL_PATH)/external/libzip/lib
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/libzip
+LOCAL_C_INCLUDES += 					\
+	$(LOCAL_PATH)/include/libzip			\
+	$(ZLIB_C_INCLUDES)
 
 LOCAL_SRC_FILES += 					\
 	$(LIBZIP)/mkstemp.c				\

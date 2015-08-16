@@ -18,6 +18,7 @@ AC_PREFIX_DEFAULT()
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -113,6 +114,7 @@ if test "$enable_png" = "yes"; then
   PKG_CHECK_MODULES([LIBPNG], [libpng >= 1.2.2], [PNG=yes], [PNG=])
 fi
 
+AC_SUBST(LIBPNG)
 AC_SUBST(LIBPNG_CFLAGS)
 AC_SUBST(LIBPNG_LIBS)
 AC_SUBST(WITH_SYSTEM_PNG,$PNG)
@@ -154,7 +156,10 @@ AC_ARG_WITH(zlib-prefix,
       [ZPREFIX=${withval}],
       [ZPREFIX='z_'])
 AC_CHECK_LIB(z, zlibVersion, ,
-    AC_CHECK_LIB(z, ${ZPREFIX}zlibVersion, , AC_MSG_ERROR(zlib not installed)))
+    AC_CHECK_LIB(z, ${ZPREFIX}zlibVersion,[ZLIB=yes],[ZLIB=]))
+AC_SUBST(ZLIB_CFLAGS)
+AC_SUBST(ZLIB_LIBS)
+AC_SUBST(WITH_SYSTEM_ZLIB,$ZLIB)
 
 # Threads
 THREADFLAGS="-D_REENTRANT"
@@ -218,13 +223,6 @@ LIBJPEG='-ljpeg'
 AM_CONDITIONAL(JPEG_PROVIDER, test "$JPEG" = "yes")
 AC_SUBST(JPEG_PROVIDER)
 AC_SUBST(LIBJPEG)
-
-# PNG 
-PNG=yes
-LIBPNG='-lpng'
-AM_CONDITIONAL(PNG_PROVIDER, test "$PNG" = "yes")
-AC_SUBST(PNG_PROVIDER)
-AC_SUBST(LIBPNG)
 
 # DirectFB version
 DIRECTFB_MAJOR_VERSION=1
@@ -399,6 +397,7 @@ AC_CONFIG_FILES([ 										\
   external/directfb/include/directfb_version.h:external/directfb/include/directfb_version.h.in	\
   external/directfb/lib/direct/build.h:external/directfb/lib/direct/build.h.in			\
   external/directfb/lib/fusion/build.h:external/directfb/lib/fusion/build.h.in			\
+  external/zlib/zconf.h:external/zlib/zconf.h.in						\
   settings.mk:settings.in	\
 ])
 

@@ -13,6 +13,7 @@ external/directfb/lib/fusion/build.h
 external/freetype/builds/unix/ftconfig.h
 external/jpeg/jconfig.h
 external/png/config.h
+external/zlib/zconf.h
 *.o
 *.so
 out

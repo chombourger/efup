@@ -13,7 +13,12 @@ PNG = $(LOCAL_PATH)/external/png
 
 LOCAL_CFLAGS += -funroll-loops
 LOCAL_CFLAGS += -DHAVE_CONFIG_H
-LOCAL_C_INCLUDES += . include/png $(PNG)
+
+LOCAL_C_INCLUDES += 		\
+	.			\
+	include/png		\
+	$(PNG)			\
+	$(ZLIB_C_INCLUDES)
 
 LOCAL_SRC_FILES += 		\
 	$(PNG)/png.c		\
