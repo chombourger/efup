@@ -103,6 +103,20 @@ AX_LUA_LIBS(true,true)
 AM_PATH_NSPR
 AM_PATH_NSS
 
+# Check for PNG
+PNG=
+AC_ARG_ENABLE(png,
+              AC_HELP_STRING([--enable-png],
+                             [build PNG image provider, @<:@default=yes@:>@]),
+              [], [enable_png=yes])
+if test "$enable_png" = "yes"; then
+  PKG_CHECK_MODULES([LIBPNG], [libpng >= 1.2.2], [PNG=yes], [PNG=])
+fi
+
+AC_SUBST(LIBPNG_CFLAGS)
+AC_SUBST(LIBPNG_LIBS)
+AC_SUBST(WITH_SYSTEM_PNG,$PNG)
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([		\
@@ -381,12 +395,14 @@ DIRECTFB_BUILD_PURE_VOODOO=0
 AC_SUBST(DIRECTFB_BUILD_PURE_VOODOO)
 
 AC_CONFIG_FILES([ 										\
-  Makefile											\
   external/directfb/include/directfb_build.h:external/directfb/include/directfb_build.h.in	\
   external/directfb/include/directfb_version.h:external/directfb/include/directfb_version.h.in	\
   external/directfb/lib/direct/build.h:external/directfb/lib/direct/build.h.in			\
   external/directfb/lib/fusion/build.h:external/directfb/lib/fusion/build.h.in			\
-  settings.mk:settings.in									\
+  settings.mk:settings.in	\
 ])
 
-AC_OUTPUT
+AC_OUTPUT([			\
+  Makefile			\
+])
+

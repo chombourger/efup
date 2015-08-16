@@ -1,2 +1,14 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# DirectFB
 DIRECTFB_VERSION=@DIRECTFB_VERSION@
 FLUXED_ARGS_BYTES=@FLUXED_ARGS_BYTES@
+
+# PNG
+LIBPNG_CFLAGS:=@LIBPNG_CFLAGS@
+LIBPNG_LIBS:=@LIBPNG_LIBS@
+WITH_SYSTEM_PNG:=@WITH_SYSTEM_PNG@
+LIBPNG_LDFLAGS:=$(filter-out -l%,$(LIBPNG_LIBS))
+LIBPNG_LDLIBS:=$(filter -l%,$(LIBPNG_LIBS))

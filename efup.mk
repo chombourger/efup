@@ -71,6 +71,11 @@ endif
 
 ifndef WITH_SYSTEM_PNG
 
+PNG_C_INCLUDES := 			\
+	include/png			\
+	external/png			\
+	.
+
 PNG_STATIC_LIBRARIES = png
 
 endif
@@ -106,7 +111,8 @@ LOCAL_SRC_FILES +=			\
 	src/volume.c			\
 
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS)
-LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS)
+LOCAL_LDFLAGS += $(LIBPNG_LDFLAGS)
+LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(LIBPNG_LDLIBS)
 
 LOCAL_STATIC_LIBRARIES += 		\
 	$(LUA_STATIC_LIBRARIES)		\
@@ -185,11 +191,6 @@ include $(BUILD_STATIC_LIBRARY)
 
 ##############################################################################
 
-include build/components/lua.mk
-include build/components/nss.mk
-include build/components/freetype.mk
-include build/components/jpeg.mk
-include build/components/png.mk
-include build/components/directfb.mk
+include $(wildcard build/components/*.mk)
 
 ##############################################################################

@@ -30,9 +30,9 @@ $(module)_ldflags:=					\
 
 $(module)_ldlibs:=					\
 	$(sys_ldlibs)					\
-	$(LOCAL_LDLIBS)					\
 	$($(module)_static_libraries:%=-l%)		\
 	$($(module)_shared_libraries:%=-l%)		\
+	$(LOCAL_LDLIBS)					\
 
 $(module)_deps:=					\
 	$($(module)_o_files)				\
@@ -46,7 +46,9 @@ $(module): $($(module)_deps)
 		$($(module)_cflags)			\
 		$($(module)_o_files)			\
 		$($(module)_ldflags)			\
+		-Wl,--start-group			\
 		$($(module)_ldlibs)			\
+		-Wl,--end-group				\
 
 $(D)$(sbindir)/$(module): $(module)
 	$(MKDIR_P) $(dir $@)
