@@ -30,6 +30,9 @@ endif
 ifeq ($(HOST_OS),linux-gnueabi)
 SYSTEM:=Linux
 endif
+ifeq ($(HOST_OS),linux-gnueabihf)
+SYSTEM:=Linux
+endif
 endif
 
 ifdef SYSTEM
