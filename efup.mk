@@ -185,11 +185,11 @@ include $(BUILD_STATIC_LIBRARY)
 
 ##############################################################################
 
-include lua.mk
-include nss.mk
-include freetype.mk
-include jpeg.mk
-include png.mk
-include directfb.mk
+include build/components/lua.mk
+include build/components/nss.mk
+include build/components/freetype.mk
+include build/components/jpeg.mk
+include build/components/png.mk
+include build/components/directfb.mk
 
 ##############################################################################
