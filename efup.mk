@@ -69,6 +69,12 @@ DFB_STATIC_LIBRARIES :=			\
 	
 endif
 
+ifndef WITH_SYSTEM_PNG
+
+PNG_STATIC_LIBRARIES = png
+
+endif
+
 ##############################################################################
 
 include $(CLEAR_VARS)
@@ -102,7 +108,11 @@ LOCAL_SRC_FILES +=			\
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS)
 LOCAL_LDLIBS += $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS)
 
-LOCAL_STATIC_LIBRARIES += $(LUA_STATIC_LIBRARIES) zip $(DFB_STATIC_LIBRARIES)
+LOCAL_STATIC_LIBRARIES += 		\
+	$(LUA_STATIC_LIBRARIES)		\
+	zip				\
+	$(DFB_STATIC_LIBRARIES)		\
+	$(PNG_STATIC_LIBRARIES)
 
 LOCAL_SHARED_LIBRARIES :=		\
 	$(NSS_SHARED_LIBRARIES)		\

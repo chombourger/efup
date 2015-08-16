@@ -5,6 +5,7 @@
 #include <efup/efup.h>
 #include <efup/fstab.h>
 #include <efup/scripting.h>
+#include <efup/ui.h>
 #include <efup/verifier.h>
 #include <efup/volume.h>
 
@@ -40,6 +41,10 @@ main(int argc, char **argv) {
     /* Show we are starting up. */
     printf("Starting efup on %s\n", ctime(&start));
 
+    /* Initialize the user interface. */
+    error = ui_init(argc, argv);
+    if (error) goto end;
+
     /* Initialize the list of volumes. */
     volume_list_init(&volumes);
 
@@ -58,6 +63,7 @@ destroy_volume_list:
     /* Free the list of volumes. */
     volume_list_destroy(&volumes);
 
+end:
     /* Return status (0=success, >0 for errors). */
     return error;
 }
