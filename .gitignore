@@ -14,6 +14,9 @@ external/freetype/builds/unix/ftconfig.h
 external/jpeg/jconfig.h
 external/png/config.h
 external/zlib/zconf.h
+initramfs
+initramfs.cpio
+initramfs.gz
 *.o
 *.so
 out

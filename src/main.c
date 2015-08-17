@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <efup/efup.h>
+#include <efup/dev.h>
 #include <efup/fstab.h>
 #include <efup/scripting.h>
 #include <efup/ui.h>
@@ -33,6 +34,9 @@ main(int argc, char **argv) {
     time_t start = time(NULL);
     FILE *f = f;
     int error;
+
+    error = dev_init();
+    if (error) goto end;
 
     /* Re-direct stdout and stderr to our log file. */
     //f = freopen(LOG_FILE, "a", stdout); setbuf(stdout, NULL);

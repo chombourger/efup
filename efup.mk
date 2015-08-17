@@ -104,6 +104,7 @@ LOCAL_C_INCLUDES += 			\
 	$(DFB_INCLUDES)
 
 LOCAL_SRC_FILES +=			\
+	src/dev.c			\
 	src/extract.c			\
 	src/format.c			\
 	src/fstab.c			\
