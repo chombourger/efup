@@ -7,11 +7,17 @@
 #include <efup/scripting.h>
 #include <efup/source.h>
 
+#include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
-#include <errno.h>
-#include <string.h>
 
 /** Lua state/environment. */
 static lua_State *state = NULL;
@@ -102,6 +108,41 @@ lua_mount(lua_State *state) {
 }
 
 static int
+lua_mknod(lua_State *state) {
+    int argc = lua_gettop(state);
+    const char *name, *type;
+    int major, minor;
+    mode_t flags = 0666;
+    int result = 0;
+
+    if (argc == 5) {
+        if ((lua_type(state, 2) == LUA_TSTRING) &&
+            (lua_type(state, 3) == LUA_TSTRING) &&
+            (lua_type(state, 4) == LUA_TNUMBER) &&
+            (lua_type(state, 5) == LUA_TNUMBER)) {
+
+            name  = lua_tostring(state, 2);
+            type  = lua_tostring(state, 3);
+            major = lua_tonumber(state, 4);
+            minor = lua_tonumber(state, 5);
+
+            if (strcmp(type, "b") == 0) flags |= S_IFBLK;
+            else if (strcmp(type, "c") == 0) flags |= S_IFCHR;
+            else result = EINVAL;
+        }
+        else result = EINVAL;
+    }
+    else result = EINVAL;
+
+    if (result == 0) {
+        result = mknod(name, flags, makedev(major, minor));
+    }
+
+    lua_pushnumber(state, result);
+    return 1;
+}
+
+static int
 lua_run(lua_State *state) {
     int argc = lua_gettop(state);
     const char *script;
@@ -186,6 +227,7 @@ static const struct luaL_Reg efup_funcs [] = {
     { "format",  lua_format  },
     { "fstab",   lua_fstab   },
     { "mount",   lua_mount   },
+    { "mknod",   lua_mknod   },
     { "run",     lua_run     },
     { "source",  lua_source  },
     { "umount",  lua_umount  },

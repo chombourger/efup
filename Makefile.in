@@ -51,6 +51,7 @@ initramfs: force
 	$(MKDIR_P) initramfs/data
 	$(MAKE) install D=$(PWD)/initramfs
 	$(INSTALL) -m 644 efup.lua initramfs/
+	$(INSTALL) -m 644 init.lua initramfs/
 	$(INSTALL) -m 644 efup.fstab initramfs/
 	$(INSTALL) -m 644 data/*.png initramfs/data/
 	(cd initramfs && ln -sf $(sbindir)/efup init)

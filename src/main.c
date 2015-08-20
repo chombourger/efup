@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <efup/efup.h>
-#include <efup/dev.h>
 #include <efup/fstab.h>
 #include <efup/scripting.h>
 #include <efup/ui.h>
@@ -35,19 +34,12 @@ main(int argc, char **argv) {
     FILE *f = f;
     int error;
 
-    error = dev_init();
-    if (error) goto end;
-
     /* Re-direct stdout and stderr to our log file. */
     //f = freopen(LOG_FILE, "a", stdout); setbuf(stdout, NULL);
     //f = freopen(LOG_FILE, "a", stderr); setbuf(stderr, NULL);
 
     /* Show we are starting up. */
     printf("Starting efup on %s\n", ctime(&start));
-
-    /* Initialize the user interface. */
-    error = ui_init(argc, argv);
-    if (error) goto end;
 
     /* Initialize the list of volumes. */
     volume_list_init(&volumes);
@@ -56,10 +48,21 @@ main(int argc, char **argv) {
     error = scripting_init();
     if (error) goto destroy_volume_list;
 
+    /* Run the initialization script. */
+    error = scripting_load("init.lua");
+    if (error) goto destroy_scripting;
+
+    /* Initialize the user interface. */
+    error = ui_init(argc, argv);
+    if (error) goto destroy_scripting;
+
     //verifier_init("test.db");
     error = scripting_load("efup.lua");
     //verifier_destroy();
 
+    ui_destroy();
+
+destroy_scripting:
     /* Clean-up the scripting environment. */
     scripting_destroy();
 
@@ -67,9 +70,7 @@ destroy_volume_list:
     /* Free the list of volumes. */
     volume_list_destroy(&volumes);
 
-end:
     /* Return status (0=success, >0 for errors). */
-    ui_destroy();
     return error;
 }
 

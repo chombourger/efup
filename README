@@ -68,6 +68,13 @@ efup:fstab(<fstab-file>)
 
    Example: efup:fstab("/etc/efup.fstab")
 
+efup:mknod(<name>,<type>,<major>,<minor>)
+
+   Create a device node. Use "b" as the <type> for block devices and
+   "c" for character devices.
+
+   Example: efup:mknod("/dev/console", "c", 5, 1)
+
 efup:mount(<volume>)
 
    Mount the specified volume. The device and file-system type are determined
