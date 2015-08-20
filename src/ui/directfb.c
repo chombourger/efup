@@ -6,8 +6,8 @@
 
 static IDirectFB *dfb = NULL;
 static IDirectFBSurface *primary = NULL;
-static int screen_width  = 0;
-static int screen_height = 0;
+int ui_width  = 0;
+int ui_height = 0;
 
 void __D_init_all(void);
 void *ref_d_init_all = __D_init_all;
@@ -35,17 +35,78 @@ ui_init(int argc, char **argv) {
     error = dfb->CreateSurface(dfb, &dsc, &primary);
     if (error != DFB_OK) return error;
 
-    primary->GetSize(primary, &screen_width, &screen_height);
-    primary->FillRectangle(primary, 0, 0, screen_width, screen_height);
-
-    primary->SetColor(primary, 0x80, 0x80, 0xff, 0xff);
-    primary->DrawLine(primary, 0, screen_height / 2, screen_width - 1, screen_height / 2);
+    primary->GetSize(primary, &ui_width, &ui_height);
+    primary->FillRectangle(primary, 0, 0, ui_width, ui_height);
     primary->Flip(primary, NULL, 0);
-
-    sleep(5);
-
-    primary->Release(primary);
-    dfb->Release(dfb);
 
     return 0;
 }
+
+void
+ui_destroy(void) {
+
+    if (primary) {
+        primary->Release(primary);
+        primary = NULL;
+    }
+
+    if (dfb) {
+       dfb->Release(dfb);
+       dfb = NULL;
+    }
+}
+
+void
+ui_flip_buffers(void) {
+
+    if (primary) {
+        primary->Flip(primary, NULL, DSFLIP_WAITFORSYNC);
+    }
+}
+
+void *
+ui_load_image(const char *path, int *pWidth, int *pHeight) {
+    IDirectFBImageProvider *provider;
+    IDirectFBSurface *surface;
+    DFBSurfaceDescription dsc;
+    void *result = NULL;
+    int status;
+
+    if ((path != NULL) && (dfb != NULL)) {
+        status = dfb->CreateImageProvider(dfb, path, &provider);
+        if (status == DFB_OK) {
+            status = provider->GetSurfaceDescription(provider, &dsc);
+            if (status == DFB_OK) {
+                if (pWidth) *pWidth = dsc.width;
+                if (pHeight) *pHeight = dsc.height;
+                status = dfb->CreateSurface(dfb, &dsc, &surface);
+                if (status == DFB_OK) {
+                    provider->RenderTo(provider, surface, NULL);
+                    result = surface;
+                }
+            }
+            provider->Release(provider);
+        }
+    }
+
+    return result;
+}
+
+void
+ui_draw_image(void *image, unsigned int x, unsigned int y) {
+   IDirectFBSurface *surface = image;
+
+   if ((image != NULL) && (primary != NULL)) {
+       primary->Blit(primary, surface, NULL, x, y);
+   }
+}
+
+void
+ui_unload_image(void *image) {
+   IDirectFBSurface *surface = image;
+
+   if (surface) {
+       surface->Release(surface);
+   }
+}
+

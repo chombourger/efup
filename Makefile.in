@@ -48,9 +48,11 @@ force:
 initramfs: force
 	rm -rf initramfs
 	$(MKDIR_P) initramfs/dev
+	$(MKDIR_P) initramfs/data
 	$(MAKE) install D=$(PWD)/initramfs
 	$(INSTALL) -m 644 efup.lua initramfs/
 	$(INSTALL) -m 644 efup.fstab initramfs/
+	$(INSTALL) -m 644 data/*.png initramfs/data/
 	(cd initramfs && ln -sf $(sbindir)/efup init)
 	$(STRIP) initramfs$(sbindir)/efup
 	$(STRIP) initramfs$(libdir)/*.so*

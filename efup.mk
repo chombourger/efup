@@ -113,6 +113,7 @@ LOCAL_SRC_FILES +=			\
 	src/mtab.c			\
 	src/run.c			\
 	src/scripting/main.c		\
+	src/scripting/ui.c		\
 	src/source.c			\
 	src/source_local_folder.c	\
 	src/source_local_zip.c		\

@@ -56,9 +56,9 @@ main(int argc, char **argv) {
     error = scripting_init();
     if (error) goto destroy_volume_list;
 
-    verifier_init("test.db");
+    //verifier_init("test.db");
     error = scripting_load("efup.lua");
-    verifier_destroy();
+    //verifier_destroy();
 
     /* Clean-up the scripting environment. */
     scripting_destroy();
@@ -69,6 +69,7 @@ destroy_volume_list:
 
 end:
     /* Return status (0=success, >0 for errors). */
+    ui_destroy();
     return error;
 }
 

@@ -16,6 +16,9 @@
 /** Lua state/environment. */
 static lua_State *state = NULL;
 
+extern int
+luaopen_ui(lua_State *L);
+
 static int
 lua_extract(lua_State *state) {
     int argc = lua_gettop(state);
@@ -179,15 +182,15 @@ lua_verify(lua_State *state) {
 }
 
 static const struct luaL_Reg efup_funcs [] = {
-   { "extract", lua_extract },
-   { "format", lua_format },
-   { "fstab", lua_fstab },
-   { "mount", lua_mount },
-   { "run", lua_run },
-   { "source", lua_source },
-   { "umount", lua_umount },
-   { "verify", lua_verify },
-   { NULL, NULL }
+    { "extract", lua_extract },
+    { "format",  lua_format  },
+    { "fstab",   lua_fstab   },
+    { "mount",   lua_mount   },
+    { "run",     lua_run     },
+    { "source",  lua_source  },
+    { "umount",  lua_umount  },
+    { "verify",  lua_verify  },
+    { NULL,      NULL        }
 };
 
 static int
@@ -210,6 +213,9 @@ scripting_init(void) {
     if (state != NULL) {
         luaL_openlibs(state);
         luaL_requiref(state, "efup", lua_register_funcs, 1);
+        lua_pop(state, 1);
+        luaL_requiref(state, "ui", luaopen_ui, 1);
+        lua_pop(state, 1);
         result = 0;
     }
     else {
@@ -238,9 +244,17 @@ scripting_load(const char *file) {
 
     if ((state != NULL) && (file != NULL)) {
         result = luaL_loadfile(state, file);
-        if (result == 0) result = lua_pcall(state, 0, 0, 0);
-        else if (result == LUA_ERRSYNTAX) {
-            fprintf(stderr, "%s: syntax error\n", file);
+        if (result == 0) {
+            result = lua_pcall(state, 0, 0, 0);
+            if (result != LUA_OK) {
+printf("pcall: %d\n", result);
+                if (result == LUA_ERRSYNTAX) {
+                    fprintf(stderr, "%s: syntax error\n", file);
+                }
+                else {
+                    fprintf(stderr, "%s\n", lua_tostring(state, -1));
+                }
+            }
         }
     }
     else result = EINVAL;
@@ -254,9 +268,17 @@ scripting_exec(const char *line) {
 
     if ((state != NULL) && (line != NULL)) {
         result = luaL_loadbuffer(state, line, strlen(line), "line");
-        if (result == 0) result = lua_pcall(state, 0, 0, 0);
-        else if (result == LUA_ERRSYNTAX) {
-            fprintf(stderr, "syntax error\n");
+        if (result == 0) {
+            result = lua_pcall(state, 0, 0, 0);
+            if (result != LUA_OK) {
+printf("### pcall %d\n", result);
+                if (result == LUA_ERRSYNTAX) {
+                    fprintf(stderr, "syntax error\n");
+                }
+                else {
+                    fprintf(stderr, "%s\n", lua_tostring(state, -1));
+                }
+            }
         }
     }
     else result = EINVAL;

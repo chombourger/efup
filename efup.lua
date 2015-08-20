@@ -1,3 +1,10 @@
+
+i = ui:Image("data/tux.png")
+x = (ui:Width() - i:Width()) / 2
+y = (ui:Height() - i:Height()) / 2
+i:Draw(x, y)
+ui:FlipBuffers()
+
 -- Load volume table 
 ret = efup:fstab("efup.fstab")
 if ret == 0 then
