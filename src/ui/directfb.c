@@ -149,9 +149,16 @@ ui_set_color(int r, int g, int b, int a) {
 
 void
 ui_draw_string(const char *text, int x, int y, int flags) {
+   int align_flags;
    int dfb_flags = 0;
 
    if (primary) {
+      align_flags = (flags & UI_TEXT_ALIGN_FLAGS);
+      switch (align_flags) {
+         case UI_TEXT_LEFT  : dfb_flags |= DSTF_LEFT;   break;
+         case UI_TEXT_CENTER: dfb_flags |= DSTF_CENTER; break;
+         case UI_TEXT_RIGHT : dfb_flags |= DSTF_RIGHT;  break;
+      }
       primary->DrawString(primary, text, -1, x, y, dfb_flags);
    }
 }

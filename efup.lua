@@ -9,7 +9,7 @@ f = ui:Font("data/Vera.ttf", 24)
 ui:SetFont(f)
 
 ui:SetColor(0, 80, 0, 255)
-ui:DrawString("Initializing", x, y + i:Height(), 0);
+ui:DrawString("Initializing", x + (i:Width() / 2), y + i:Height(), ui.TEXT_CENTER);
 
 ui:FlipBuffers()
 

@@ -4,6 +4,11 @@
 
 #pragma once
 
+#define UI_TEXT_LEFT        0
+#define UI_TEXT_CENTER      1
+#define UI_TEXT_RIGHT       2
+#define UI_TEXT_ALIGN_FLAGS 3
+
 extern int ui_width;
 extern int ui_height;
 

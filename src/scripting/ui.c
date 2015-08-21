@@ -226,24 +226,41 @@ luaopen_ui(lua_State *L) {
 
     state = L;
 
+    /* Create the "ui" library */
     luaL_newlib(L, ui_lib);
 
+    /* Add constants to the UI object */
+    lua_pushnumber(L, UI_TEXT_LEFT);
+    lua_setfield(L, -2, "TEXT_LEFT");
+    lua_pushnumber(L, UI_TEXT_CENTER);
+    lua_setfield(L, -2, "TEXT_CENTER");
+    lua_pushnumber(L, UI_TEXT_RIGHT);
+    lua_setfield(L, -2, "TEXT_RIGHT");
+
+    /* Setup meta data for the "Font" object */
     luaL_newmetatable(L, FontTypeName);
     luaL_newlib(L, font_lib);
     lua_setfield(L, -2, "__index");
 
+    /* GC callback for the "Font" object */
     lua_pushstring(L, "__gc");
     lua_pushcfunction(L, lua_font_gc);
     lua_settable(L, -3);
+
+    /* Remove the Font library object from the stack */
     lua_pop(L, 1);
 
+    /* Setup meta data for the "Image" object */
     luaL_newmetatable(L, ImageTypeName);
     luaL_newlib(L, image_lib);
     lua_setfield(L, -2, "__index");
  
+    /* GC callback for the "Image" object */
     lua_pushstring(L, "__gc");
     lua_pushcfunction(L, lua_image_gc);
     lua_settable(L, -3);
+
+    /* Remove the Image library object from the stack */
     lua_pop(L, 1);
 
     return 1;
