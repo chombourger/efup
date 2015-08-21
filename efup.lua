@@ -6,6 +6,10 @@ y = (ui:Height() - i:Height()) / 2
 i:Draw(x, y)
 
 f = ui:Font("data/Vera.ttf", 24)
+ui:SetFont(f)
+
+ui:SetColor(0, 80, 0, 255)
+ui:DrawString("Initializing", x, y + i:Height(), 0);
 
 ui:FlipBuffers()
 

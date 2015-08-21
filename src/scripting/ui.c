@@ -110,6 +110,13 @@ lua_font_gc(lua_State *L) {
 }
 
 static int
+lua_ui_set_font(lua_State *L) {
+   struct Font *pFont = checkFont(L, 2);
+   if (pFont) ui_set_font(pFont->data);
+    return 0;
+}
+
+static int
 lua_image_gc(lua_State *L) {
     struct Image *pImage = checkImage(L, 1);
     if (pImage) {
@@ -165,6 +172,33 @@ lua_image_height(lua_State *L) {
     return 1;
 }
 
+static int
+lua_ui_set_color(lua_State *L) {
+   int r, g, b, a;
+
+   r = lua_tonumber(L, 2);
+   g = lua_tonumber(L, 3);
+   b = lua_tonumber(L, 4);
+   a = lua_tonumber(L, 5);
+
+   ui_set_color(r, g, b, a);
+   return 0;
+}
+
+static int
+lua_ui_draw_string(lua_State *L) {
+   const char *text;
+   int x, y, flags;
+
+   text  = lua_tostring(L, 2);
+   x     = lua_tonumber(L, 3);
+   y     = lua_tonumber(L, 4);
+   flags = lua_tonumber(L, 5);
+
+   ui_draw_string(text, x, y, flags);
+   return 0;
+}
+
 int
 luaopen_ui(lua_State *L) {
     static const struct luaL_Reg font_lib[] = {
@@ -179,10 +213,13 @@ luaopen_ui(lua_State *L) {
     };
     
     static const struct luaL_Reg ui_lib[] = {
+        { "DrawString",  lua_ui_draw_string  },
         { "FlipBuffers", lua_ui_flip_buffers },
         { "Font",        lua_ui_font         },
         { "Height",      lua_ui_height       },
         { "Image",       lua_ui_image        },
+        { "SetColor",    lua_ui_set_color    },
+        { "SetFont",     lua_ui_set_font     },
         { "Width",       lua_ui_width        },
         { NULL,          NULL                }
     };

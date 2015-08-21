@@ -135,4 +135,24 @@ ui_unload_font(void *font) {
    IDirectFBFont *pFont = font;
    if (pFont) pFont->Release(pFont);
 }
- 
+
+void
+ui_set_font(void *font) {
+   IDirectFBFont *pFont = font;
+   if (primary) primary->SetFont(primary, pFont);
+}
+
+void
+ui_set_color(int r, int g, int b, int a) {
+   if (primary) primary->SetColor(primary, r, g, b, a);
+}
+
+void
+ui_draw_string(const char *text, int x, int y, int flags) {
+   int dfb_flags = 0;
+
+   if (primary) {
+      primary->DrawString(primary, text, -1, x, y, dfb_flags);
+   }
+}
+
