@@ -54,6 +54,7 @@ initramfs: force
 	$(INSTALL) -m 644 init.lua initramfs/
 	$(INSTALL) -m 644 efup.fstab initramfs/
 	$(INSTALL) -m 644 data/*.png initramfs/data/
+	$(INSTALL) -m 644 data/*.ttf initramfs/data/
 	(cd initramfs && ln -sf $(sbindir)/efup init)
 	$(STRIP) initramfs$(sbindir)/efup
 	$(STRIP) initramfs$(libdir)/*.so*

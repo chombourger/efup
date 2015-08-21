@@ -30,7 +30,8 @@ LOCAL_C_INCLUDES +=						\
 	$(DFB)/lib						\
 	$(DFB)/src						\
 	$(DFB)/systems						\
-	$(PNG_C_INCLUDES)
+	$(PNG_C_INCLUDES)					\
+	$(FREETYPE_C_INCLUDES)
 
 LOCAL_SRC_FILES += 								\
 	$(ppcasm_sources)							\
@@ -201,7 +202,8 @@ LOCAL_SRC_FILES += 								\
 	$(DFB)/systems/fbdev/surfacemanager.c					\
 	$(DFB)/systems/fbdev/vt.c						\
 	$(DFB)/wm/default/default.c						\
-	$(DFB)/interfaces/IDirectFBImageProvider/idirectfbimageprovider_png.c
+	$(DFB)/interfaces/IDirectFBImageProvider/idirectfbimageprovider_png.c	\
+	$(DFB)/interfaces/IDirectFBFont/idirectfbfont_ft2.c
 
 
 LOCAL_STATIC_LIBRARIES = $(PNG_STATIC_LIBRARIES)

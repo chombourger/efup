@@ -22,6 +22,12 @@ ui_draw_image(void *image, unsigned int x, unsigned int y);
 void
 ui_unload_image(void *image);
 
+void *
+ui_load_font(const char *path, int height);
+
+void
+ui_unload_font(void *font);
+
 void
 ui_destroy(void);
 

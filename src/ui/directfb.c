@@ -17,6 +17,8 @@ void directfbwm_default(void);
 void *ref_directfbwm_default = directfbwm_default;
 void IDirectFBImageProvider_PNG_ctor(void);
 void *ref_idirectfbimageprovider_png = IDirectFBImageProvider_PNG_ctor;
+void IDirectFBFont_FT2_ctor(void);
+void *ref_idirectfbfont_png = IDirectFBFont_FT2_ctor;
 
 int
 ui_init(int argc, char **argv) {
@@ -110,3 +112,27 @@ ui_unload_image(void *image) {
    }
 }
 
+void *
+ui_load_font(const char *path, int height) {
+    DFBFontDescription dsc;
+    IDirectFBFont *result;
+    int status;
+
+    if (dfb) {
+        dsc.flags  = DFDESC_HEIGHT;
+        dsc.height = height;
+
+        status = dfb->CreateFont(dfb, path, &dsc, &result);
+        if (status != DFB_OK) result = NULL;
+    }
+    else result = NULL;
+
+    return result;
+}
+
+void
+ui_unload_font(void *font) {
+   IDirectFBFont *pFont = font;
+   if (pFont) pFont->Release(pFont);
+}
+ 

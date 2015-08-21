@@ -15,13 +15,26 @@
 /** Lua state/environment. */
 static lua_State *state = NULL;
 
+struct Font {
+   void *data;
+};
+
 struct Image {
    void *data;
    int width;
    int height;
 };
 
+const static char *FontTypeName  = "FontTypeName";
 const static char *ImageTypeName = "ImageTypeName";
+
+struct Font *
+checkFont(lua_State *L, int i) {
+    struct Font *pFont;
+
+    pFont = luaL_checkudata(L, i, FontTypeName);
+    return pFont;
+}
 
 struct Image *
 checkImage(lua_State *L, int i) {
@@ -29,6 +42,25 @@ checkImage(lua_State *L, int i) {
 
     pImage = luaL_checkudata(L, i, ImageTypeName);
     return pImage;
+}
+
+static int
+lua_ui_font(lua_State *L) {
+    struct Font *pFont;
+    void *pFontData;
+    const char *path;
+    int height;
+
+    path = lua_tostring(L, 2);
+    height = lua_tonumber(L, 3);
+
+    pFontData = ui_load_font(path, height);
+
+    pFont = lua_newuserdata(L, sizeof(struct Font));
+    pFont->data = pFontData;
+    luaL_setmetatable(L, FontTypeName);
+
+    return 1;
 }
 
 static int
@@ -66,6 +98,15 @@ static int
 lua_ui_height(lua_State *L) {
     lua_pushnumber(state, ui_height);
     return 1;
+}
+
+static int
+lua_font_gc(lua_State *L) {
+    struct Font *pFont = checkFont(L, 1);
+    if (pFont) {
+        ui_unload_font(pFont->data);
+    }
+    return 0;
 }
 
 static int
@@ -126,6 +167,10 @@ lua_image_height(lua_State *L) {
 
 int
 luaopen_ui(lua_State *L) {
+    static const struct luaL_Reg font_lib[] = {
+        { NULL,     NULL             }
+    };
+
     static const struct luaL_Reg image_lib[] = {
         { "Draw",   lua_image_draw   },
         { "Height", lua_image_height },
@@ -135,6 +180,7 @@ luaopen_ui(lua_State *L) {
     
     static const struct luaL_Reg ui_lib[] = {
         { "FlipBuffers", lua_ui_flip_buffers },
+        { "Font",        lua_ui_font         },
         { "Height",      lua_ui_height       },
         { "Image",       lua_ui_image        },
         { "Width",       lua_ui_width        },
@@ -142,18 +188,27 @@ luaopen_ui(lua_State *L) {
     };
 
     state = L;
-    
+
     luaL_newlib(L, ui_lib);
+
+    luaL_newmetatable(L, FontTypeName);
+    luaL_newlib(L, font_lib);
+    lua_setfield(L, -2, "__index");
+
+    lua_pushstring(L, "__gc");
+    lua_pushcfunction(L, lua_font_gc);
+    lua_settable(L, -3);
+    lua_pop(L, 1);
 
     luaL_newmetatable(L, ImageTypeName);
     luaL_newlib(L, image_lib);
     lua_setfield(L, -2, "__index");
-    
+ 
     lua_pushstring(L, "__gc");
     lua_pushcfunction(L, lua_image_gc);
     lua_settable(L, -3);
     lua_pop(L, 1);
- 
+
     return 1;
 }
 

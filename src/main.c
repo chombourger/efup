@@ -60,7 +60,13 @@ main(int argc, char **argv) {
     error = scripting_load("efup.lua");
     //verifier_destroy();
 
+    /* We need to destroy the scripting framework before the UI to make sure
+     * all UI objects created from scripts are gc'ed. */
+    scripting_destroy();
+
+    /* Now destroy the UI framework. */
     ui_destroy();
+    goto destroy_volume_list;
 
 destroy_scripting:
     /* Clean-up the scripting environment. */

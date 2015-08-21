@@ -1,8 +1,12 @@
 
+-- Load and display logo
 i = ui:Image("data/tux.png")
 x = (ui:Width() - i:Width()) / 2
 y = (ui:Height() - i:Height()) / 2
 i:Draw(x, y)
+
+f = ui:Font("data/Vera.ttf", 24)
+
 ui:FlipBuffers()
 
 -- Load volume table 
