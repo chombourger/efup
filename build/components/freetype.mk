@@ -27,11 +27,18 @@ LOCAL_SRC_FILES += 			\
 	$(FT2)/src/base/ftmm.c		\
 	$(FT2)/src/base/ftbdf.c		\
 	$(FT2)/src/base/ftbbox.c	\
+	$(FT2)/src/base/ftcalc.c	\
+	$(FT2)/src/base/ftobjs.c	\
+	$(FT2)/src/base/ftstream.c	\
+	$(FT2)/src/base/fttrigon.c	\
+	$(FT2)/src/base/ftgloadr.c	\
+	$(FT2)/src/base/ftoutln.c	\
 	$(FT2)/src/base/ftdebug.c	\
 	$(FT2)/src/base/ftxf86.c	\
 	$(FT2)/src/base/fttype1.c	\
 	$(FT2)/src/base/ftpfr.c		\
 	$(FT2)/src/base/ftstroke.c	\
+	$(FT2)/src/base/ftutil.c	\
 	$(FT2)/src/base/ftwinfnt.c	\
 	$(FT2)/src/bdf/bdfdrivr.c	\
 	$(FT2)/src/bdf/bdflib.c		\
