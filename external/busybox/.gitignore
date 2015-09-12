@@ -1,0 +1,4 @@
+.kconfig.d
+*.cmd
+Kbuild
+Config.in
