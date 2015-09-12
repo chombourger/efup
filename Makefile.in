@@ -45,10 +45,18 @@ distclean: clean
 
 force:
 
-initramfs: force
+certs:=$(wildcard signing/certs/*.cert)
+certs.db: force
+	rm -rf certs.db
+	$(MKDIR_P) certs.db
+	certutil -N -d certs.db --empty-password
+	$(if $(certs),$(foreach c,$(certs),certutil -A -d certs.db -n $(basename $(c)) -i $(c) -t P,P,P &&) true)
+
+initramfs: certs.db force
 	rm -rf initramfs
 	$(MKDIR_P) initramfs/dev
 	$(MKDIR_P) initramfs/data
+	cp -r certs.db initramfs
 	$(MAKE) install D=$(PWD)/initramfs
 	$(INSTALL) -m 644 efup.lua initramfs/
 	$(INSTALL) -m 644 init.lua initramfs/

@@ -10,9 +10,24 @@
 #include <efup/volume.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #define LOG_FILE "/tmp/efup.log"
+
+#define TOOL(name) extern int name##_main(int, char **);
+#include <efup/tools.h>
+#undef TOOL
+
+static struct {
+    const char *name;
+    int (*main)(int, char **);
+} tools[] = {
+#define TOOL(name) { #name, name##_main },
+#include <efup/tools.h>
+#undef TOOL
+    { NULL, NULL }
+};
 
 /** List of volumes. */
 volume_list_t volumes;
@@ -29,7 +44,7 @@ source_t *update_source = NULL;
   *
   */
 int
-main(int argc, char **argv) {
+efup_main(int argc, char **argv) {
     time_t start = time(NULL);
     FILE *f = f;
     int error;
@@ -56,9 +71,9 @@ main(int argc, char **argv) {
     error = ui_init(argc, argv);
     if (error) goto destroy_scripting;
 
-    //verifier_init("test.db");
+    verifier_init("certs.db");
     error = scripting_load("efup.lua");
-    //verifier_destroy();
+    verifier_destroy();
 
     /* We need to destroy the scripting framework before the UI to make sure
      * all UI objects created from scripts are gc'ed. */
@@ -78,5 +93,20 @@ destroy_volume_list:
 
     /* Return status (0=success, >0 for errors). */
     return error;
+}
+
+int
+main(int argc, char **argv) {
+    char *name = argv[0];
+    int i;
+
+    for(i = 0; tools[i].name; i++){
+        if (!strcmp(tools[i].name, name)) {
+            return tools[i].main(argc, argv);
+        }
+    }
+
+    printf("%s: no such tool\n", name);
+    return -1;
 }
 

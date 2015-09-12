@@ -16,6 +16,7 @@
 
 typedef enum {
     ARC_UNKNOWN,
+    ARC_TAR,
     ARC_TAR_BZ2,
     ARC_TAR_GZ
 } arc_type_t;
@@ -71,6 +72,20 @@ do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, const char 
                 switch (type) {
                     case ARC_UNKNOWN:
                         result = ENOSYS;
+                        break;
+                    case ARC_TAR:
+                        tar = tar_path();
+                        if (tar != NULL) {
+                            argv[0] = (char *) tar;
+                            argv[1] = "-xf";
+                            argv[2] = "-";
+                            argv[3] = "-C";
+                            argv[4] = (char *) targetp;
+                            argv[5] = NULL;
+                            result = execv(tar, argv);
+                            if (result == -1) result = errno;
+                        }
+                        else result = ENOENT;
                         break;
                     case ARC_TAR_BZ2:
                         tar = tar_path();
@@ -149,7 +164,8 @@ extract(source_t *sourcep, const char *archive, const char *targetp) {
         len = strlen(archive);
 
         /* Check for supported archives. */
-        if ((len >= 8) && (strcmp(archive+len-8, ".tar.bz2") == 0)) type = ARC_TAR_BZ2;
+        if ((len >= 4) && (strcmp(archive+len-4, ".tar") == 0)) type = ARC_TAR;
+        else if ((len >= 8) && (strcmp(archive+len-8, ".tar.bz2") == 0)) type = ARC_TAR_BZ2;
         else if ((len >= 7) && (strcmp(archive+len-7, ".tar.gz") == 0)) type = ARC_TAR_GZ;
 
         /* Supported archive? */

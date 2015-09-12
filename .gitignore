@@ -1,6 +1,7 @@
 Makefile
 aclocal.m4
 autom4te.cache
+certs.db
 configure
 config.log
 config.status
