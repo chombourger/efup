@@ -96,11 +96,22 @@ destroy_volume_list:
 }
 
 int
+init_main(int argc, char **argv) {
+   return efup_main(argc, argv);
+}
+
+int
 main(int argc, char **argv) {
     char *name = argv[0];
+    char *cmd;
     int i;
 
-    for(i = 0; tools[i].name; i++){
+    /* Strip path to get name of the requested tool. */
+    cmd = strrchr(argv[0], '/');
+    if (cmd) name = cmd + 1;
+
+    /* Lookup requested tool. */
+    for (i = 0; tools[i].name; i++) {
         if (!strcmp(tools[i].name, name)) {
             return tools[i].main(argc, argv);
         }

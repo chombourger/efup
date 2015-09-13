@@ -16,23 +16,29 @@ ui:FlipBuffers()
 -- Load volume table 
 ret = efup:fstab("efup.fstab")
 if ret == 0 then
-    print("Volumes loaded.");
-    -- Use update.zip from the current directory
-    ret = efup:source("file://update.zip")
+    print("Volumes loaded.")
+    ret = efup:mount("/volumes/usb")
     if ret == 0 then
-        print("Update source selected.")
-        -- Verify its signature
-        ret = efup:verify()
+        print("USB disk mounted")
+        -- Use update.zip from the mounted volume
+        ret = efup:source("file:///volumes/usb/update.zip")
         if ret == 0 then
-           print("Update verified.")
-           -- Run the actual download script from the archive
-           print("Running update script")
-           ret = efup:run("download.lua")
+            print("Update source selected.")
+            -- Verify its signature
+            ret = efup:verify()
+            if ret == 0 then
+                print("Update verified.")
+                -- Run the actual download script from the archive
+                print("Running update script")
+                ret = efup:run("download.lua")
+            else
+                print("Signature verification failed")
+            end
         else
-           print("Signature verification failed")
+            print("Failed to open update file!")
         end
     else
-       print("Failed to open update file!")
+        print("Failed to mount USB disk!")
     end
 else
     print("Failed to load volume table!")

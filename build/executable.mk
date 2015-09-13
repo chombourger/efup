@@ -42,7 +42,7 @@ $(module)_deps:=					\
 $(module): module:=$(module)
 $(module): $($(module)_deps)
 	@echo LD $(module)
-	$(Q) $(CXX) -rdynamic -o $@			\
+	$(Q) $(CC) -rdynamic -o $@			\
 		$($(module)_cflags)			\
 		$($(module)_o_files)			\
 		$($(module)_ldflags)			\

@@ -23,7 +23,7 @@ LOCAL_PATH := .
 sys_cflags   := $(CFLAGS)
 sys_cppflags := $(CPPFLAGS)
 sys_ldflags  := $(LDFLAGS)
-sys_libs     := dl m pthread rt $(if $(WITH_SYSTEM_ZLIB),z,)
+sys_libs     := dl m pthread rt stdc++ $(if $(WITH_SYSTEM_ZLIB),z,)
 
 .PHONY: all
 all: build
@@ -37,7 +37,7 @@ build: $(build_targets)
 
 .PHONY: clean
 clean:
-	$(Q) rm -f $(clean_targets)
+	$(Q) rm -rf $(clean_targets)
 
 .PHONY: install
 install: $(install_targets)
