@@ -1,6 +1,8 @@
 
 -- Create device nodes
 efup:mknod("/dev/fb0", "c", 29, 0)
+efup:mknod("/dev/random", "c", 1, 8)
+efup:mknod("/dev/urandom", "c", 1, 9)
 efup:mknod("/dev/sda1", "b", 8, 1)
 efup:mknod("/dev/sda2", "b", 8, 2)
 efup:mknod("/dev/sda3", "b", 8, 3)
