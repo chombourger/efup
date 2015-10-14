@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
+#include <sys/reboot.h>
+#include <sys/mount.h>
 
 #define LOG_FILE "/tmp/efup.log"
 
@@ -56,6 +59,10 @@ efup_main(int argc, char **argv) {
     /* Show we are starting up. */
     printf("Starting efup on %s\n", ctime(&start));
 
+    /* Mount /proc and /sys */
+    mount(NULL, "/proc", "proc", 0, NULL);
+    mount(NULL, "/sys", "sysfs", 0, NULL);
+
     /* Initialize the list of volumes. */
     volume_list_init(&volumes);
 
@@ -97,7 +104,12 @@ destroy_volume_list:
 
 int
 init_main(int argc, char **argv) {
-   return efup_main(argc, argv);
+   efup_main(argc, argv);
+
+   /* Sync and reboot. */
+   printf("Rebooting!");
+   sync();
+   return reboot(RB_AUTOBOOT);
 }
 
 int
