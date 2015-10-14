@@ -15,28 +15,28 @@ $(module)_cflags := $($(module)_cflags) -fPIC
 $(module)_shared_libraries:=$(LOCAL_SHARED_LIBRARIES)
 $(module)_static_libraries:=$(LOCAL_STATIC_LIBRARIES)
 
-$(module)_ushared_libraries:=$(filter-out $(sys_libs),	\
-	$($(module)_shared_libraries)			\
+$(module)_ushared_libraries:=$(filter-out $(sys_libs),		\
+	$($(module)_shared_libraries)				\
 )
 
-$(module)_ustatic_libraries:=$(filter-out $(sys_libs),	\
-	$($(module)_static_libraries)			\
+$(module)_ustatic_libraries:=$(filter-out $(sys_libs),		\
+	$($(module)_static_libraries)				\
 )
 
-$(module)_ldflags:=					\
-	$(sys_ldflags)					\
-	-L.						\
-	-Lout						\
+$(module)_ldflags:=						\
+	$(sys_ldflags)						\
+	-L.							\
+	-L$(outdir)						\
 
-$(module)_ldlibs:=					\
-	$(sys_ldlibs)					\
-	$($(module)_static_libraries:%=-l%)		\
-	$($(module)_shared_libraries:%=-l%)		\
+$(module)_ldlibs:=						\
+	$(sys_ldlibs)						\
+	$($(module)_static_libraries:%=-l%)			\
+	$($(module)_shared_libraries:%=-l%)			\
 
-$(module)_deps:=					\
-	$($(module)_o_files)				\
-	$($(module)_ushared_libraries:%=lib%.so)	\
-	$($(module)_ustatic_libraries:%=out/lib%.a)
+$(module)_deps:=						\
+	$($(module)_o_files)					\
+	$($(module)_ushared_libraries:%=lib%.so)		\
+	$($(module)_ustatic_libraries:%=$(outdir)/lib%.a)
 
 lib$(module).so: module:=$(module)
 lib$(module).so: $($(module)_deps)

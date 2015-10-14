@@ -35,6 +35,8 @@ INSTALL = @INSTALL@
 MKDIR_P = @MKDIR_P@
 PERL    = @PERL@
 
+BUILD_CC = @BUILD_CC@
+
 include settings.mk
 include main.mk
 
@@ -56,6 +58,8 @@ initramfs: certs.db force
 	rm -rf initramfs
 	$(MKDIR_P) initramfs/dev
 	$(MKDIR_P) initramfs/data
+	$(MKDIR_P) initramfs/proc
+	$(MKDIR_P) initramfs/sys
 	$(MKDIR_P) initramfs/volumes/root
 	$(MKDIR_P) initramfs/volumes/usb
 	cp -r certs.db initramfs
@@ -69,8 +73,8 @@ initramfs: certs.db force
 	ln -sf efup initramfs/$(sbindir)/init
 	$(STRIP) initramfs$(sbindir)/efup
 	$(STRIP) initramfs$(libdir)/*.so*
-	$(if $(wildcard out/bb/_install),						\
-		cp -ra out/bb/_install/* initramfs && )true
+	$(if $(wildcard out/target/bb/_install),						\
+		cp -ra out/target/bb/_install/* initramfs && )true
 	$(if $(SYSROOT),	\
 		$(MKDIR_P) initramfs/lib &&						\
 		$(INSTALL) -m 755 $(SYSROOT)/lib/ld-linux-armhf.so.3 initramfs/lib &&	\

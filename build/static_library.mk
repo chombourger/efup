@@ -6,11 +6,11 @@ module:=$(LOCAL_MODULE)
 
 include build/objects.mk
 
-build_targets := $(build_targets) out/lib$(module).a
-clean_targets := $(clean_targets) out/lib$(module).a
+build_targets := $(build_targets) $(outdir)/lib$(module).a
+clean_targets := $(clean_targets) $(outdir)/lib$(module).a
 
-out/lib$(module).a: module:=$(module)
-out/lib$(module).a: $($(module)_o_files)
+$(outdir)/lib$(module).a: module:=$(module)
+$(outdir)/lib$(module).a: $($(module)_o_files)
 	@echo AR $(module)
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(AR) r $@ $^

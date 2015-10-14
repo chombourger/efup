@@ -40,7 +40,7 @@ mke2fs_path(void) {
 static int
 exec_mke2fs(const char *path, const char *type) {
     int result;
-    char *argv[6];
+    char *argv[7];
     pid_t pid;
     const char *mke2fs;
 
@@ -51,8 +51,9 @@ exec_mke2fs(const char *path, const char *type) {
         argv[1] = "-t";
         argv[2] = (char *) type;
         argv[3] = "-q";
-        argv[4] = (char *) path;
-        argv[5] = NULL;
+        argv[4] = "-F";
+        argv[5] = (char *) path;
+        argv[6] = NULL;
 
         pid = fork();
         if (pid == 0) {
@@ -115,6 +116,7 @@ format(const char *vol) {
     /* Volume may be formatted? */
     if (result == 0) {
         dev = volume_get_spec(volume);
+        result = ENOSYS;
         if (strcmp(fsType, "ext2") == 0) result = format_ext2(dev);
         if (strcmp(fsType, "ext3") == 0) result = format_ext3(dev);
         if (strcmp(fsType, "ext4") == 0) result = format_ext4(dev);

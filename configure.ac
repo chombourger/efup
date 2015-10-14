@@ -9,6 +9,9 @@ AC_CONFIG_HEADERS([	\
 	external/jpeg/jconfig.h:external/jpeg/jconfig.cfg \
 	external/png/config.h:external/png/config.h.in \
 	external/directfb/config.h:external/directfb/config.h.in \
+	external/e2fsprogs/lib/config.h:external/e2fsprogs/lib/config.h.in \
+	external/e2fsprogs/lib/dirpaths.h:external/e2fsprogs/lib/dirpaths.h.in \
+	external/util-linux/config.h:external/util-linux/config.h.in \
 ])
 
 # Default to empty prefix (binaries going to /sbin and /lib)
@@ -96,6 +99,13 @@ case "$target_or_host" in
     ;;
 esac
 
+# See if we need a separate native compiler.
+if test $cross_compiling = no; then
+  BUILD_CC="$CC"
+  AC_SUBST(BUILD_CC)
+else
+  AC_CHECK_PROGS(BUILD_CC, gcc cc)
+fi
 
 # Check for LUA
 AC_SUBST([LUA_VERSION],5.2)
@@ -124,14 +134,41 @@ AC_SUBST(WITH_SYSTEM_PNG,$PNG)
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([		\
+	errno.h			\
+	malloc.h		\
+	paths.h			\
 	signal.h		\
 	stdarg.h		\
 	stddef.h		\
 	stdlib.h		\
 	string.h		\
 	linux/compiler.h	\
+	linux/falloc.h		\
+	linux/fd.h		\
+	linux/major.h		\
+	linux/loop.h		\
 	linux/unistd.h		\
+	unistd.h		\
+	sys/disk.h		\
+	sys/disklabel.h		\
+	sys/file.h		\
+	sys/ioctl.h		\
+	sys/mman.h		\
+	sys/mount.h		\
+	sys/mkdev.h		\
+	sys/param.h		\
+	sys/prctl.h		\
+	sys/resource.h		\
+	sys/select.h		\
+	sys/socket.h		\
+	sys/sockio.h		\
+	sys/stat.h		\
+	sys/syscall.h		\
+	sys/sysmacros.h		\
 	sys/time.h		\
+	sys/types.h		\
+	sys/un.h		\
+	sys/wait.h		\
 ])
 
 AC_CHECK_HEADERS(linux/compiler.h linux/unistd.h asm/page.h signal.h)
@@ -150,6 +187,19 @@ AC_C_BIGENDIAN
 
 # Checks for library functions.
 AC_FUNC_STRTOD
+AC_CHECK_FUNCS([	\
+	fsync		\
+	llseek		\
+	llseek64	\
+	memalign	\
+	mempcpy		\
+	mmap		\
+	munmap		\
+	nanosleep	\
+	strcasecmp	\
+	sysconf		\
+	usleep		\
+])
 AC_CHECK_FUNCS([memset], , AC_MSG_ERROR(memset not found in libc))
 AC_CHECK_FUNCS([pow], , AC_CHECK_LIB(m, pow, , AC_MSG_ERROR(cannot find pow)) )
 AC_ARG_WITH(zlib-prefix,
@@ -394,11 +444,80 @@ AC_SUBST(DIRECTFB_BUILD_VOODOO)
 DIRECTFB_BUILD_PURE_VOODOO=0
 AC_SUBST(DIRECTFB_BUILD_PURE_VOODOO)
 
+### e2fsprogs
+E2FSPROGS_VERSION="1.43.12"
+AC_SUBST(E2FSPROGS_VERSION)
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(long long)
+AC_CHECK_SIZEOF(off_t)
+SIZEOF_SHORT=$ac_cv_sizeof_short
+SIZEOF_INT=$ac_cv_sizeof_int
+SIZEOF_LONG=$ac_cv_sizeof_long
+SIZEOF_LONG_LONG=$ac_cv_sizeof_long_long
+SIZEOF_OFF_T=$ac_cv_sizeof_off_t
+AC_SUBST(SIZEOF_SHORT)
+AC_SUBST(SIZEOF_INT)
+AC_SUBST(SIZEOF_LONG)
+AC_SUBST(SIZEOF_LONG_LONG)
+AC_SUBST(SIZEOF_OFF_T)
+AC_C_BIGENDIAN
+if test $cross_compiling = no; then
+  BUILD_CC="$BUILD_CC" CPP="$CPP" /bin/sh external/e2fsprogs/config/parse-types.sh
+else
+  CROSS_COMPILE="1" BUILD_CC="$BUILD_CC" CPP="$CPP" /bin/sh external/e2fsprogs/config/parse-types.sh
+fi
+mv asm_types.h external/e2fsprogs/asm_types.h
+ASM_TYPES_HEADER=external/e2fsprogs/asm_types.h
+AC_SUBST_FILE(ASM_TYPES_HEADER)
+dnl
+dnl Save the configuration #defines needed for the public ext2fs.h
+dnl header file
+dnl
+echo "/* These defines are needed for the public ext2fs.h header file */" \
+     > public_config.h
+if grep HAVE_SYS_TYPES_H confdefs.h > tmp_config.$$; then
+  uniq tmp_config.$$ >> public_config.h
+else
+  echo "#undef HAVE_SYS_TYPES_H" >> public_config.h
+fi
+if grep WORDS_BIGENDIAN confdefs.h > tmp_config.$$; then
+  uniq tmp_config.$$ >> public_config.h
+else
+  echo "#undef WORDS_BIGENDIAN" >> public_config.h
+fi
+rm -f tmp_config.$$
+PUBLIC_CONFIG_HEADER=./public_config.h
+AC_SUBST_FILE(PUBLIC_CONFIG_HEADER)
+mv public_config.h external/e2fsprogs/public_config.h
+AC_CHECK_DECL(llseek,[AC_DEFINE(HAVE_LLSEEK_PROTOTYPE, 1,
+			[Define to 1 if llseek declared in unistd.h])],,
+	      [#include <unistd.h>])
+AC_CHECK_DECL(lseek64,[AC_DEFINE(HAVE_LSEEK64_PROTOTYPE, 1,
+			[Define to 1 if lseek64 declared in unistd.h])],,
+		[#define _LARGEFILE_SOURCE
+		 #define _LARGEFILE64_SOURCE
+		 #include <unistd.h>])
+
+### util-linux
+LIBBLKID_VERSION="2.27"
+AC_DEFINE_UNQUOTED([LIBBLKID_VERSION], ["$LIBBLKID_VERSION"], [libblkid version string])
+AC_SUBST([LIBBLKID_VERSION])
+
+LIBBLKID_DATE="07-Sep-2015"
+AC_SUBST([LIBBLKID_DATE])
+AC_DEFINE_UNQUOTED([LIBBLKID_DATE], ["$LIBBLKID_DATE"], [libblkid date string])
+
+AC_CHECK_FUNCS([openat fstatat unlinkat], [have_openat=yes], [have_openat=no])
+
 AC_CONFIG_FILES([ 										\
   external/directfb/include/directfb_build.h:external/directfb/include/directfb_build.h.in	\
   external/directfb/include/directfb_version.h:external/directfb/include/directfb_version.h.in	\
   external/directfb/lib/direct/build.h:external/directfb/lib/direct/build.h.in			\
   external/directfb/lib/fusion/build.h:external/directfb/lib/fusion/build.h.in			\
+  external/e2fsprogs/lib/ext2fs/ext2_types.h:external/e2fsprogs/lib/ext2fs/ext2_types.h.in \
+  external/e2fsprogs/util/subst.conf:external/e2fsprogs/util/subst.conf.in			\
   external/zlib/zconf.h:external/zlib/zconf.h.in						\
   settings.mk:settings.in	\
 ])

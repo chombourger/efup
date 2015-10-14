@@ -819,7 +819,7 @@ LOCAL_SHARED_LIBRARIES += $(NSPR_SHARED_LIBRARIES)
 NSS_CERTDATA_PERL = $(NSS)/ckfw/builtins/certdata.perl
 NSS_CERTDATA_TXT  = $(NSS)/ckfw/builtins/certdata.txt
 
-out/$(NSS)/ckfw/builtins/certdata.c:	\
+out/target/$(NSS)/ckfw/builtins/certdata.c:	\
 	$(NSS_CERTDATA_PERL)		\
 	$(NSS_CERTDATA_TXT)		\
 

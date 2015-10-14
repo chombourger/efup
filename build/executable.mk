@@ -14,41 +14,41 @@ $(module)_shared_libraries:=$(LOCAL_SHARED_LIBRARIES)
 $(module)_static_libraries:=$(LOCAL_STATIC_LIBRARIES)
 
 # User-defined shared libraries
-$(module)_ushared_libraries:=$(filter-out $(sys_libs),	\
-	$($(module)_shared_libraries)			\
+$(module)_ushared_libraries:=$(filter-out $(sys_libs),		\
+	$($(module)_shared_libraries)				\
 )
 
 # User-defined static libraries
-$(module)_ustatic_libraries:=$(filter-out $(sys_libs),	\
-	$($(module)_static_libraries)			\
+$(module)_ustatic_libraries:=$(filter-out $(sys_libs),		\
+	$($(module)_static_libraries)				\
 )
 
-$(module)_ldflags:=					\
-	$(sys_ldflags)					\
-	-L.						\
-	-Lout						\
+$(module)_ldflags:=						\
+	$(sys_ldflags)						\
+	-L.							\
+	-L$(outdir)						\
 
-$(module)_ldlibs:=					\
-	$(sys_ldlibs)					\
-	$($(module)_static_libraries:%=-l%)		\
-	$($(module)_shared_libraries:%=-l%)		\
-	$(LOCAL_LDLIBS)					\
+$(module)_ldlibs:=						\
+	$(sys_ldlibs)						\
+	$($(module)_static_libraries:%=-l%)			\
+	$($(module)_shared_libraries:%=-l%)			\
+	$(LOCAL_LDLIBS)						\
 
-$(module)_deps:=					\
-	$($(module)_o_files)				\
-	$($(module)_ushared_libraries:%=lib%.so)	\
-	$($(module)_ustatic_libraries:%=out/lib%.a)	\
+$(module)_deps:=						\
+	$($(module)_o_files)					\
+	$($(module)_ushared_libraries:%=lib%.so)		\
+	$($(module)_ustatic_libraries:%=$(outdir)/lib%.a)	\
 
 $(module): module:=$(module)
 $(module): $($(module)_deps)
 	@echo LD $(module)
-	$(Q) $(CC) -rdynamic -o $@			\
-		$($(module)_cflags)			\
-		$($(module)_o_files)			\
-		$($(module)_ldflags)			\
-		-Wl,--start-group			\
-		$($(module)_ldlibs)			\
-		-Wl,--end-group				\
+	$(Q) $(CC) -rdynamic -o $@				\
+		$($(module)_cflags)				\
+		$($(module)_o_files)				\
+		$($(module)_ldflags)				\
+		-Wl,--start-group				\
+		$($(module)_ldlibs)				\
+		-Wl,--end-group					\
 
 $(D)$(sbindir)/$(module): $(module)
 	$(MKDIR_P) $(dir $@)
