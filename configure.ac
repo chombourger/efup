@@ -116,6 +116,12 @@ AX_LUA_LIBS(true,true)
 AM_PATH_NSPR
 AM_PATH_NSS
 
+# Check for DirectFB
+DFB_CFLAGS=`pkg-config directfb --cflags`
+DFB_LIBS=`pkg-config directfb --libs`
+AC_SUBST(DFB_CFLAGS)
+AC_SUBST(DFB_LIBS)
+
 # Check for PNG
 PNG=
 AC_ARG_ENABLE(png,

@@ -9,6 +9,7 @@ static IDirectFBSurface *primary = NULL;
 int ui_width  = 0;
 int ui_height = 0;
 
+#ifndef WITH_SYSTEM_DIRECTFB
 void __D_init_all(void);
 void *ref_d_init_all = __D_init_all;
 void directfb_fbdev(void);
@@ -19,6 +20,7 @@ void IDirectFBImageProvider_PNG_ctor(void);
 void *ref_idirectfbimageprovider_png = IDirectFBImageProvider_PNG_ctor;
 void IDirectFBFont_FT2_ctor(void);
 void *ref_idirectfbfont_png = IDirectFBFont_FT2_ctor;
+#endif
 
 int
 ui_init(int argc, char **argv) {

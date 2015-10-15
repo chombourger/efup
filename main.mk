@@ -16,6 +16,10 @@ ifdef NSS_LIBS
 WITH_SYSTEM_NSS:=1
 endif
 
+ifdef DFB_LIBS
+WITH_SYSTEM_DIRECTFB:=1
+endif
+
 include build/build.mk
 
 LOCAL_PATH := .

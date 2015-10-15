@@ -30,9 +30,9 @@ $(module)_ldflags:=						\
 
 $(module)_ldlibs:=						\
 	$(sys_ldlibs)						\
+	$(LOCAL_LDLIBS)						\
 	$($(module)_static_libraries:%=-l%)			\
 	$($(module)_shared_libraries:%=-l%)			\
-	$(LOCAL_LDLIBS)						\
 
 $(module)_deps:=						\
 	$($(module)_o_files)					\
