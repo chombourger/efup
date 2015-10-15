@@ -83,12 +83,6 @@ lua_ui_image(lua_State *L) {
 }
 
 static int
-lua_ui_flip_buffers(lua_State *L) {
-    ui_flip_buffers();
-    return 0;
-}
-
-static int
 lua_ui_width(lua_State *L) {
     lua_pushnumber(state, ui_width);
     return 1;
@@ -200,6 +194,32 @@ lua_ui_draw_string(lua_State *L) {
 }
 
 int
+lua_ui_show_progress(lua_State *L) {
+   int x, y, w, h;
+
+   x = lua_tonumber(L, 2);
+   y = lua_tonumber(L, 3);
+   w = lua_tonumber(L, 4);
+   h = lua_tonumber(L, 5);
+
+   ui_show_progress(x, y, w, h);
+   return 0;
+}
+
+int
+lua_ui_fill_rectangle(lua_State *L) {
+   int x, y, w, h;
+
+   x = lua_tonumber(L, 2);
+   y = lua_tonumber(L, 3);
+   w = lua_tonumber(L, 4);
+   h = lua_tonumber(L, 5);
+
+   ui_fill_rectangle(x, y, w, h);
+   return 0;
+}
+
+int
 luaopen_ui(lua_State *L) {
     static const struct luaL_Reg font_lib[] = {
         { NULL,     NULL             }
@@ -213,15 +233,16 @@ luaopen_ui(lua_State *L) {
     };
     
     static const struct luaL_Reg ui_lib[] = {
-        { "DrawString",  lua_ui_draw_string  },
-        { "FlipBuffers", lua_ui_flip_buffers },
-        { "Font",        lua_ui_font         },
-        { "Height",      lua_ui_height       },
-        { "Image",       lua_ui_image        },
-        { "SetColor",    lua_ui_set_color    },
-        { "SetFont",     lua_ui_set_font     },
-        { "Width",       lua_ui_width        },
-        { NULL,          NULL                }
+        { "DrawString",     lua_ui_draw_string     },
+        { "FillRectangle",  lua_ui_fill_rectangle  },
+        { "Font",           lua_ui_font            },
+        { "Height",         lua_ui_height          },
+        { "Image",          lua_ui_image           },
+        { "SetColor",       lua_ui_set_color       },
+        { "SetFont",        lua_ui_set_font        },
+        { "ShowProgress",   lua_ui_show_progress   },
+        { "Width",          lua_ui_width           },
+        { NULL,             NULL                   }
     };
 
     state = L;

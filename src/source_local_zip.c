@@ -3,7 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <efup/source.h>
+#include <efup/ui.h>
 #include <efup/verifier.h>
+
 #include "external/libzip/lib/zip.h"
 
 #include <errno.h>
@@ -28,6 +30,7 @@ struct source_file {
 
 static void source_zip_destroy(source_t *sourcep);
 static int source_zip_verify(source_t *sourcep);
+static unsigned long long source_zip_size(source_t *sourcep, const char *path);
 static int source_zip_load(source_t *sourcep, const char *path, void **bufferp, size_t *sizep);
 static source_file_t *source_zip_open(source_t *sourcep, const char *path);
 static int source_zip_read(source_file_t *filep, void *buf, size_t size);
@@ -37,6 +40,7 @@ static const source_t zip_source_vtable = {
     source_zip_destroy,
     source_zip_verify,
     source_zip_load,
+    source_zip_size,
     source_zip_open,
     source_zip_read,
     source_zip_close
@@ -88,35 +92,60 @@ static void source_zip_destroy(source_t *sourcep) {
 
 static int
 source_zip_verify(source_t *sourcep) {
-    struct zip_source *zip_source = (struct zip_source *) sourcep;
-    char buffer[1024];
-    FILE *filep;
-    int n, result;
+   struct zip_source *zip_source = (struct zip_source *) sourcep;
+   struct stat st;
+   char buffer[1024];
+   FILE *filep;
+   int n, percent, result;
+   unsigned long long bytesRead = 0;
 
-    if (sourcep != NULL) {
-        filep = fopen(zip_source->path, "rb");
-        if (filep != NULL) {
+   if (sourcep != NULL) {
+      result = stat(zip_source->path, &st);
+      if (result == 0) {
+         filep = fopen(zip_source->path, "rb");
+         if (filep != NULL) {
             result = verifier_prepare();
             if (result == 0) {
-                while (result == 0 && !ferror(filep) && !feof(filep)) {
-                    n = fread(buffer, 1, sizeof(buffer), filep);
-                    if (n > 0) {
-                        result = verifier_feed(buffer, n);
-                    }
-                }
-                if (result == 0) {
-                    result = verifier_finish();
-                }        
+               while (result == 0 && !ferror(filep) && !feof(filep)) {
+                  n = fread(buffer, 1, sizeof(buffer), filep);
+                  if (n > 0) {
+                     bytesRead += n;
+                     percent = (bytesRead * 100 / st.st_size);
+                     ui_progress(percent);
+                     result = verifier_feed(buffer, n);
+                  }
+               }
+               if (result == 0) {
+                  result = verifier_finish();
+               }
             }
             fclose(filep);
-        }
-        else result = errno;
-    }
-    else result = EBADF;
+         }
+         else result = errno;
+      }
+      else result = errno;
+   }
+   else result = EBADF;
 
-    return result;
+   return result;
 }
 
+static unsigned long long
+source_zip_size(source_t *sourcep, const char *path) {
+   struct zip_source *zip_source = (struct zip_source *) sourcep;
+   struct zip_stat zips;
+   int result;
+
+   if ((sourcep != NULL) && (path != NULL)) {
+      result = zip_stat(zip_source->zip, path, ZIP_FL_UNCHANGED, &zips);
+      if (result == 0) {
+         return zips.size;
+      }
+   }
+
+   return (unsigned long long) -1;
+}
+ 
 static int source_zip_load(source_t *sourcep, const char *path, void **bufferp, size_t *sizep) {
     struct zip_source *zip_source = (struct zip_source *) sourcep;
     char *script_buffer = NULL, *read_buffer;

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <efup/efup.h>
+#include <efup/ui.h>
 
 #include <errno.h>
 #include <signal.h>
@@ -43,14 +44,15 @@ tar_path(void) {
 }
 
 static int
-do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, const char *targetp) {
+do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, unsigned long long bytesTotal, const char *targetp) {
     int pipe_fds[2];
     pid_t pid;
     char buffer[1024];
     char *argv[6];
     const char *tar;
     int n, result;
-    unsigned int total;
+    unsigned long long bytesRead = 0;
+    int percent;
 
     /* Create the pipe to feed the unarchiver process (e.g. tar). */
     result = pipe(pipe_fds);
@@ -123,11 +125,12 @@ do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, const char 
         else {
             /* Parent */
             close(pipe_fds[0]);
-            total = 0;
             do {
                 n = sourcep->read(filep, buffer, sizeof(buffer));
-                if (n >= 0) {
-                    total += n;
+                if (n > 0) {
+                    bytesRead += n;
+                    percent = (bytesRead * 100 / bytesTotal);
+                    ui_progress(percent);
                     result = write(pipe_fds[1], buffer, n);
                     if (result == -1) {
                         result = errno;
@@ -143,7 +146,6 @@ do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, const char 
             /* close pipe */
             close(pipe_fds[1]);
             /* wait for child process to exit */
-            printf("waiting for process %u to exit (%u bytes read)\n", pid, total);
             waitpid(pid, &result, 0);
         }
     }
@@ -157,6 +159,7 @@ extract(source_t *sourcep, const char *archive, const char *targetp) {
     source_file_t *filep;
     arc_type_t type = ARC_UNKNOWN;
     struct stat target_stat;
+    unsigned long long bytesTotal;
     size_t len;
     int result;
 
@@ -175,11 +178,14 @@ extract(source_t *sourcep, const char *archive, const char *targetp) {
             if (result == -1) result = errno;
             else if (!S_ISDIR(target_stat.st_mode)) result = ENOTDIR;
 
+            /* Get archive size */
+            bytesTotal = sourcep->size(sourcep, archive);
+
             /* Open source */
             filep = sourcep->open(sourcep, archive);
             if (filep != NULL) {
                 /* Do the actual extract */
-                result = do_extract(type, sourcep, filep, targetp);
+                result = do_extract(type, sourcep, filep, bytesTotal, targetp);
             }
             else result = EIO;
         }

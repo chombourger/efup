@@ -9,9 +9,23 @@ f = ui:Font("data/Vera.ttf", 24)
 ui:SetFont(f)
 
 ui:SetColor(0, 80, 0, 255)
-ui:DrawString("Initializing", x + (i:Width() / 2), y + i:Height(), ui.TEXT_CENTER);
+y = y + i:Height()
+textx = x + (i:Width() / 2)
+texty = y
+ui:DrawString("Initializing", textx, texty, ui.TEXT_CENTER);
 
-ui:FlipBuffers()
+w = ui:Width() / 4
+x = (ui:Width() / 2) - (w / 2)
+y = y + 50
+ui:ShowProgress(x, y, w, 24)
+
+function PrintMessage(msg)
+   ui:SetColor(0, 0, 0, 255)
+   ui:FillRectangle(0, texty, ui:Width(), 24);
+   ui:SetColor(0, 80, 0, 255)
+   ui:DrawString(msg, textx, texty, ui.TEXT_CENTER);
+   print(msg)
+end
 
 -- Load volume table 
 ret = efup:fstab("efup.fstab")
@@ -19,32 +33,33 @@ if ret == 0 then
     print("Volumes loaded.")
     ret = efup:mount("/volumes/usb")
     if ret == 0 then
-        print("USB disk mounted")
+        PrintMessage("USB disk mounted")
         -- Use update.zip from the mounted volume
         ret = efup:source("file:///volumes/usb/update.zip")
         if ret == 0 then
-            print("Update source selected.")
             -- Verify its signature
+            PrintMessage("Verifying update file...")
             ret = efup:verify()
             if ret == 0 then
-                print("Update verified.")
                 -- Run the actual download script from the archive
-                print("Running update script")
+                PrintMessage("Processing update...")
                 ret = efup:run("download.lua")
             else
-                print("Signature verification failed")
+                PrintMessage("Signature verification failed")
             end
         else
-            print("Failed to open update file!")
+            PrintMessage("Failed to open update file!")
         end
     else
-        print("Failed to mount USB disk!")
+        PrintMessage("Failed to mount USB disk!")
     end
 else
-    print("Failed to load volume table!")
+    PrintMessage("Failed to load volume table!")
 end
 
 if ret ~= 0 then
-   print("Update failed!")
+   PrintMessage("Update failed!")
+else
+   PrintMessage("Update completed!")
 end
 

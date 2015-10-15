@@ -64,7 +64,6 @@ lua_format(lua_State *state) {
     }
     else result = EINVAL;
 
-    printf("format> %d\n", result);
     lua_pushnumber(state, result);
     return 1;
 }

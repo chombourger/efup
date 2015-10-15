@@ -43,5 +43,17 @@ void
 ui_draw_string(const char *text, int x, int y, int flags);
 
 void
+ui_show_progress(int x, int y, int w, int h);
+
+void
+ui_hide_progress(void);
+
+void
+ui_progress(int percent);
+
+void
+ui_fill_rectangle(int x, int y, int w, int h);
+
+void
 ui_destroy(void);
 
