@@ -193,7 +193,7 @@ lua_ui_draw_string(lua_State *L) {
    return 0;
 }
 
-int
+static int
 lua_ui_show_progress(lua_State *L) {
    int x, y, w, h;
 
@@ -203,6 +203,12 @@ lua_ui_show_progress(lua_State *L) {
    h = lua_tonumber(L, 5);
 
    ui_show_progress(x, y, w, h);
+   return 0;
+}
+
+static int
+lua_ui_hide_progress(lua_State *L) {
+   ui_hide_progress();
    return 0;
 }
 
@@ -237,6 +243,7 @@ luaopen_ui(lua_State *L) {
         { "FillRectangle",  lua_ui_fill_rectangle  },
         { "Font",           lua_ui_font            },
         { "Height",         lua_ui_height          },
+        { "HideProgress",   lua_ui_hide_progress   },
         { "Image",          lua_ui_image           },
         { "SetColor",       lua_ui_set_color       },
         { "SetFont",        lua_ui_set_font        },

@@ -14,17 +14,24 @@ textx = x + (i:Width() / 2)
 texty = y
 ui:DrawString("Initializing", textx, texty, ui.TEXT_CENTER);
 
-w = ui:Width() / 4
-x = (ui:Width() / 2) - (w / 2)
-y = y + 50
-ui:ShowProgress(x, y, w, 24)
+pbw = ui:Width() / 4
+pbx = (ui:Width() / 2) - (pbw / 2)
+pby = y + 50
 
 function PrintMessage(msg)
    ui:SetColor(0, 0, 0, 255)
-   ui:FillRectangle(0, texty, ui:Width(), 24);
+   ui:FillRectangle(0, texty-24, ui:Width(), 36);
    ui:SetColor(0, 80, 0, 255)
    ui:DrawString(msg, textx, texty, ui.TEXT_CENTER);
    print(msg)
+end
+
+function ShowProgress()
+   ui:ShowProgress(pbx, pby, pbw, 24)
+end
+
+function HideProgress()
+   ui:HideProgress()
 end
 
 -- Load volume table 
@@ -39,7 +46,9 @@ if ret == 0 then
         if ret == 0 then
             -- Verify its signature
             PrintMessage("Verifying update file...")
+            ShowProgress()
             ret = efup:verify()
+            HideProgress()
             if ret == 0 then
                 -- Run the actual download script from the archive
                 PrintMessage("Processing update...")

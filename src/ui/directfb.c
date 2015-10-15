@@ -218,10 +218,13 @@ ui_draw_progress(void) {
 
 void
 ui_hide_progress(void) {
-   ui_pb_x = 0;
-   ui_pb_y = 0;
-   ui_pb_w = 0;
-   ui_pb_h = 0;
+   if ((primary != NULL) && (ui_pb_w > 2) && (ui_pb_h > 0)) {
+      ui_clear_progress();
+      ui_pb_x = 0;
+      ui_pb_y = 0;
+      ui_pb_w = 0;
+      ui_pb_h = 0;
+   }
 }
 
 void
