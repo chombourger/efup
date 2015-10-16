@@ -63,6 +63,8 @@ initramfs: certs.db force
 	$(MKDIR_P) initramfs/data
 	$(MKDIR_P) initramfs/proc
 	$(MKDIR_P) initramfs/sys
+	$(MKDIR_P) initramfs/volumes/boot
+	$(MKDIR_P) initramfs/volumes/data
 	$(MKDIR_P) initramfs/volumes/root
 	$(MKDIR_P) initramfs/volumes/usb
 	cp -r certs.db initramfs

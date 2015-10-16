@@ -17,6 +17,12 @@ int
 format(const char *vol);
 
 int
+mdev(char **argv);
+
+int
+mdev_s(void);
+
+int
 efup_mount(const char *vol);
 
 int

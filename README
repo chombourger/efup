@@ -82,6 +82,44 @@ efup:mount(<volume>)
 
    Example: efup:mount("/data")
 
+efup:partition(<dev>)
+
+   Re-partition the specified device. Returns an object supporting the
+   following methods:
+
+      reset()
+
+         Create a new (empty) DOS partition table.
+
+      add(<type>[,<size>][,<start>])
+
+         Create and add a new partition with the specified type (e.g. 0x83 for
+         a Linux partition), size (e.g. "1G") and start offset.
+
+      write()
+
+         Write the new partition table to disk
+
+    Example:
+
+       pm = efup:partition("/dev/sdb")
+       ret = pm:reset()
+       if ret == 0 then
+          -- Create a 200MB boot partition (FAT)
+          ret = pm.add(0xc, "200M")
+          if ret == 0 then
+             -- Create a 1GB system partition (EXT4)
+             ret = pm.add(0x83, "1G")
+             if ret == 0 then
+                -- Remaining space for a data partition (EXT4)
+                ret = pm.add(0x83)
+             end
+          end
+       end
+       if ret == 0 then
+          ret = pm.write()
+       end
+ 
 efup:run(<script>)
 
    Load the specified LUA script from the current update source (see

@@ -4,11 +4,13 @@
 
 #include <efup/efup.h>
 #include <efup/fstab.h>
+#include <efup/partmgr.h>
 #include <efup/scripting.h>
 #include <efup/source.h>
 
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -24,6 +26,15 @@ static lua_State *state = NULL;
 
 extern int
 luaopen_ui(lua_State *L);
+
+extern int
+strtosize(const char *str, uintmax_t *res);
+
+const static char *PartMgrTypeName = "PartMgrTypeName";
+
+struct PartMgr {
+   void *context;
+};
 
 static int
 lua_extract(lua_State *state) {
@@ -85,6 +96,15 @@ lua_fstab(lua_State *state) {
 
     lua_pushnumber(state, result);
     return 1;
+}
+
+static int
+lua_mdev(lua_State *L) {
+   int result;
+
+   result = mdev_s();
+   lua_pushnumber(state, result);
+   return 1;
 }
 
 static int
@@ -221,22 +241,122 @@ lua_verify(lua_State *state) {
     return 1;
 }
 
+struct PartMgr *
+checkPartMgr(lua_State *L, int i) {
+   return luaL_checkudata(L, i, PartMgrTypeName);
+}
+
+static int
+lua_partmgr_new(lua_State *L) {
+    struct PartMgr *pPartMgr;
+    void *context;
+    const char *dev;
+
+    dev = lua_tostring(L, 2);
+    context = partmgr_init(dev);
+    if (context) {
+       pPartMgr = lua_newuserdata(L, sizeof(struct PartMgr));
+       pPartMgr->context = context;
+       luaL_setmetatable(L, PartMgrTypeName);
+       return 1;
+    }
+    else return 0;
+}
+
+static int
+lua_partmgr_add(lua_State *L) {
+   struct PartMgr *pPartMgr = checkPartMgr(L, 1);
+   const char *sizeString, *startString;
+   uint64_t start = (uint64_t) -1;
+   uint64_t size  = (uint64_t) -1;
+   int type, result;
+
+   type        = lua_tonumber(state, 2);
+   sizeString  = lua_tostring(L, 3);
+   startString = lua_tostring(L, 4);
+
+   if (sizeString) {
+      result = strtosize(sizeString, &size);
+   }
+
+   if (startString) {
+      start = strtoul(startString, NULL, 0);
+   }
+
+   result = partmgr_add(pPartMgr->context, type, size, start);
+   lua_pushnumber(state, result);
+   return 1;
+}
+
+static int
+lua_partmgr_reset(lua_State *L) {
+   struct PartMgr *pPartMgr = checkPartMgr(L, 1);
+   int result;
+
+   result = partmgr_reset(pPartMgr->context);
+   lua_pushnumber(state, result);
+   return 1;
+}
+
+static int
+lua_partmgr_write(lua_State *L) {
+   struct PartMgr *pPartMgr = checkPartMgr(L, 1);
+   int result;
+
+   result = partmgr_write(pPartMgr->context);
+   lua_pushnumber(state, result);
+   return 1;
+}
+
+static int
+lua_partmgr_gc(lua_State *L) {
+   struct PartMgr *pPartMgr = checkPartMgr(L, 1);
+   if (pPartMgr) {
+      partmgr_destroy(pPartMgr->context);
+   }
+   return 0;
+}
+
 static const struct luaL_Reg efup_funcs [] = {
-    { "extract", lua_extract },
-    { "format",  lua_format  },
-    { "fstab",   lua_fstab   },
-    { "mount",   lua_mount   },
-    { "mknod",   lua_mknod   },
-    { "run",     lua_run     },
-    { "source",  lua_source  },
-    { "umount",  lua_umount  },
-    { "verify",  lua_verify  },
-    { NULL,      NULL        }
+    { "extract",   lua_extract     },
+    { "format",    lua_format      },
+    { "fstab",     lua_fstab       },
+    { "mdev",      lua_mdev        },
+    { "mount",     lua_mount       },
+    { "mknod",     lua_mknod       },
+    { "partition", lua_partmgr_new },
+    { "run",       lua_run         },
+    { "source",    lua_source      },
+    { "umount",    lua_umount      },
+    { "verify",    lua_verify      },
+    { NULL,        NULL            }
 };
 
 static int
 lua_register_funcs(lua_State *state) {
+
+    static const struct luaL_Reg partmgr_lib[] = {
+        { "add",   lua_partmgr_add   },
+        { "reset", lua_partmgr_reset },
+        { "write", lua_partmgr_write },
+        { NULL,    NULL              }
+    };
+
     luaL_newlib(state, efup_funcs);
+
+    /* Setup meta data for the "PartMgr" object */
+    luaL_newmetatable(state, PartMgrTypeName);
+    luaL_newlib(state, partmgr_lib);
+    lua_setfield(state, -2, "__index");
+
+    /* GC callback for the "PartMgr" object */
+    lua_pushstring(state, "__gc");
+    lua_pushcfunction(state, lua_partmgr_gc);
+    lua_settable(state, -3);
+
+    /* Remove the PartMgr library object from the stack */
+    lua_pop(state, 1);
+
     return 1;
 }
 
@@ -288,7 +408,6 @@ scripting_load(const char *file) {
         if (result == 0) {
             result = lua_pcall(state, 0, 0, 0);
             if (result != LUA_OK) {
-printf("pcall: %d\n", result);
                 if (result == LUA_ERRSYNTAX) {
                     fprintf(stderr, "%s: syntax error\n", file);
                 }
@@ -312,7 +431,6 @@ scripting_exec(const char *line) {
         if (result == 0) {
             result = lua_pcall(state, 0, 0, 0);
             if (result != LUA_OK) {
-printf("### pcall %d\n", result);
                 if (result == LUA_ERRSYNTAX) {
                     fprintf(stderr, "syntax error\n");
                 }

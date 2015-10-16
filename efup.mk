@@ -104,22 +104,25 @@ endif
 include $(CLEAR_VARS)
 LOCAL_MODULE := efup
 
-LOCAL_C_INCLUDES += 			\
-	.				\
-	include				\
-	include/libzip			\
-	$(LUA_C_INCLUDES)		\
-	$(NSS_C_INCLUDES)		\
-	$(NSPR_C_INCLUDES)		\
-	$(DFB_INCLUDES)
+LOCAL_C_INCLUDES += 				\
+	.					\
+	include					\
+	include/libzip				\
+	$(LUA_C_INCLUDES)			\
+	$(NSS_C_INCLUDES)			\
+	$(NSPR_C_INCLUDES)			\
+	$(DFB_INCLUDES)				\
+	external/util-linux/libfdisk/src	\
 
 LOCAL_SRC_FILES +=			\
 	src/extract.c			\
 	src/format.c			\
 	src/fstab.c			\
 	src/main.c			\
+	src/mdev.c			\
 	src/mount.c			\
 	src/mtab.c			\
+	src/partmgr.c			\
 	src/run.c			\
 	src/scripting/main.c		\
 	src/scripting/ui.c		\
@@ -144,7 +147,10 @@ LOCAL_STATIC_LIBRARIES += 		\
 	$(DFB_STATIC_LIBRARIES)		\
 	$(FREETYPE_STATIC_LIBRARIES)	\
 	$(PNG_STATIC_LIBRARIES)		\
-	$(ZLIB_STATIC_LIBRARIES)
+	$(ZLIB_STATIC_LIBRARIES)	\
+	fdisk				\
+	uuid				\
+	blkid
 
 LOCAL_SHARED_LIBRARIES :=		\
 	$(NSS_SHARED_LIBRARIES)		\

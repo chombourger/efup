@@ -29,6 +29,7 @@ LOCAL_SRC_FILES += 					\
 	$(S)/lib/fileutils.c				\
 	$(S)/lib/linux_version.c			\
 	$(S)/lib/md5.c					\
+	$(S)/lib/strutils.c				\
 	$(S)/lib/sysfs.c				\
 	$(wildcard $(S)/libblkid/src/*.c)		\
 	$(wildcard $(S)/libblkid/src/partitions/*.c)	\
@@ -36,6 +37,8 @@ LOCAL_SRC_FILES += 					\
 	$(wildcard $(S)/libblkid/src/topology/*.c)
 
 include $(BUILD_STATIC_LIBRARY)
+
+##############################################################################
 
 include $(CLEAR_VARS)
 
@@ -46,13 +49,32 @@ LOCAL_SRC_FILES +=					\
 	$(S)/libuuid/src/pack.c				\
 	$(S)/libuuid/src/parse.c			\
 	$(S)/libuuid/src/unpack.c			\
+	$(S)/libuuid/src/unparse.c			\
 	$(S)/lib/randutils.c
 
-LOCAL_CFLAGS +=				\
+LOCAL_CFLAGS +=						\
 	-include $(S)/config.h
 
-LOCAL_C_INCLUDES +=			\
+LOCAL_C_INCLUDES +=					\
 	$(S)/include
+
+include $(BUILD_STATIC_LIBRARY)
+
+##############################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := fdisk
+
+LOCAL_SRC_FILES +=				\
+	$(wildcard $(S)/libfdisk/src/*.c)
+
+LOCAL_CFLAGS +=					\
+	-include $(S)/config.h
+
+LOCAL_C_INCLUDES +=				\
+	$(S)/include				\
+	$(S)/libuuid/src
 
 include $(BUILD_STATIC_LIBRARY)
 

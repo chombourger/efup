@@ -21,6 +21,11 @@ static char *mke2fs_paths[] = {
    NULL
 };
 
+static char *mkfs_vfat_paths[] = {
+   "/sbin/mkfs.vfat",
+   NULL
+};
+
 static const char *
 mke2fs_path(void) {
     char *result = NULL;
@@ -30,6 +35,22 @@ mke2fs_path(void) {
     for (i=0; mke2fs_paths[i] != NULL; i++) {
         if (stat(mke2fs_paths[i], &s) == 0) {
             result = mke2fs_paths[i];
+            break;
+        }
+    }
+
+    return result;
+}
+
+static const char *
+mkfs_vfat_path(void) {
+    char *result = NULL;
+    unsigned int i;
+    struct stat s;
+
+    for (i=0; mkfs_vfat_paths[i] != NULL; i++) {
+        if (stat(mkfs_vfat_paths[i], &s) == 0) {
+            result = mkfs_vfat_paths[i];
             break;
         }
     }
@@ -69,59 +90,87 @@ exec_mke2fs(const char *path, const char *type) {
 }
 
 static int
+exec_mkfs_vfat(const char *path) {
+    int result;
+    char *argv[3];
+    pid_t pid;
+    const char *mkfs_vfat;
+
+    /* Locate mkfs.vfat */
+    mkfs_vfat = mkfs_vfat_path();
+    if (mkfs_vfat != NULL) {
+        argv[0] = (char *) mkfs_vfat;
+        argv[1] = (char *) path;
+        argv[2] = NULL;
+
+        pid = fork();
+        if (pid == 0) {
+            execv(mkfs_vfat, argv);
+            exit(-1);
+        }
+
+        waitpid(pid, &result, 0); 
+    }
+    else result = ENOSYS;
+
+    return result;
+}
+
+static int
 format_ext2(const char *path) {
-    return exec_mke2fs(path, "ext2");
+   return exec_mke2fs(path, "ext2");
 }
 
 static int
 format_ext3(const char *path) {
-    return exec_mke2fs(path, "ext3");
+   return exec_mke2fs(path, "ext3");
 }
 
 static int
 format_ext4(const char *path) {
-    return exec_mke2fs(path, "ext4");
+   return exec_mke2fs(path, "ext4");
+}
+
+static int
+format_vfat(const char *path) {
+   return exec_mkfs_vfat(path);
 }
 
 int
 format(const char *vol) {
-    const char *fsType, *dev;
-    volume_t *volume;
-    int result;
+   const char *fsType, *dev;
+   volume_t *volume;
+   int result;
 
-    /* Lookup the specified volume. */
-    volume = volume_list_lookup_by_mount_point(&volumes, vol);
-    if (volume != NULL) {
-        /* Check mounted volumes. */
-        result = volume_list_check_mounted(&volumes);
-        if (result == 0) {
-            /* Is the volume mounted? */
-            if (volume_get_mounted(volume)) {
-                result = EBUSY;
-            }
-            else {
-                /* Get file-system type. */
-                fsType = volume_get_fs_type(volume);
-                /* Check if supported. */
-                if ((strcmp(fsType, "ext2")) &&
-                    (strcmp(fsType, "ext3")) &&
-                    (strcmp(fsType, "ext4"))) {
-                    result = ENOSYS;
-                }
-            }
-        }
-    }
-    else result = ENOENT;
+   /* Lookup the specified volume. */
+   volume = volume_list_lookup_by_mount_point(&volumes, vol);
 
-    /* Volume may be formatted? */
-    if (result == 0) {
-        dev = volume_get_spec(volume);
-        result = ENOSYS;
-        if (strcmp(fsType, "ext2") == 0) result = format_ext2(dev);
-        if (strcmp(fsType, "ext3") == 0) result = format_ext3(dev);
-        if (strcmp(fsType, "ext4") == 0) result = format_ext4(dev);
-    }
+   if (volume != NULL) {
+      /* Check mounted volumes. */
+      result = volume_list_check_mounted(&volumes);
+      if (result == 0) {
+         /* Is the volume mounted? */
+         if (volume_get_mounted(volume)) {
+            result = EBUSY;
+         }
+         else {
+            /* Get file-system type. */
+            fsType = volume_get_fs_type(volume);
+         }
+      }
+   }
+   else result = ENOENT;
 
-    return result;
+   /* Volume may be formatted? */
+   if (result == 0) {
+      dev = volume_get_spec(volume);
+      result = ENOSYS;
+      if (strcmp(fsType, "ext2") == 0) result = format_ext2(dev);
+      else if (strcmp(fsType, "ext3") == 0) result = format_ext3(dev);
+      else if (strcmp(fsType, "ext4") == 0) result = format_ext4(dev);
+      else if (strcmp(fsType, "vfat") == 0) result = format_vfat(dev);
+   }
+
+   return result;
 }
 

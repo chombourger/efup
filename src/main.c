@@ -59,9 +59,13 @@ efup_main(int argc, char **argv) {
     /* Show we are starting up. */
     printf("Starting efup on %s\n", ctime(&start));
 
-    /* Mount /proc and /sys */
-    mount(NULL, "/proc", "proc", 0, NULL);
-    mount(NULL, "/sys", "sysfs", 0, NULL);
+    /* Mount /dev, /proc and /sys */
+    (void) mount(NULL, "/dev", "dev", 0, NULL);
+    (void) mount(NULL, "/proc", "proc", 0, NULL);
+    (void) mount(NULL, "/sys", "sysfs", 0, NULL);
+
+    /* Populate /dev */
+    (void) mdev_s();
 
     /* Initialize the list of volumes. */
     volume_list_init(&volumes);

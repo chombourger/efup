@@ -1,2 +1,4 @@
 /dev/sda1	/volumes/usb	vfat rw 0 1
-/dev/sda3	/volumes/root	ext4 rw 0 1
+/dev/sdb1	/volumes/boot	vfat rw 0 1
+/dev/sdb2	/volumes/root	ext4 rw 0 1
+/dev/sdb3	/volumes/data	ext4 rw 0 1
