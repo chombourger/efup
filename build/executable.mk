@@ -35,6 +35,7 @@ $(module)_ldlibs:=						\
 	$($(module)_shared_libraries:%=-l%)			\
 
 $(module)_deps:=						\
+	$($(module)_gen_files)					\
 	$($(module)_o_files)					\
 	$($(module)_ushared_libraries:%=lib%.so)		\
 	$($(module)_ustatic_libraries:%=$(outdir)/lib%.a)	\
@@ -53,4 +54,6 @@ $(module): $($(module)_deps)
 $(D)$(sbindir)/$(module): $(module)
 	$(MKDIR_P) $(dir $@)
 	$(INSTALL) -m 755 $< $@
+
+$($(module)_o_files): $($(module)_gen_c_files) $($(module)_gen_h_files)
 

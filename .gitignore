@@ -18,6 +18,8 @@ external/zlib/zconf.h
 initramfs
 initramfs.cpio
 initramfs.gz
+mke2fs
+parse-types.log
 *.o
 *.so
 out

@@ -4,6 +4,9 @@
 
 outdir := out/target
 
+$(module)_gen_files := $(LOCAL_GEN_FILES)
+$(module)_gen_c_files := $(filter %.c, $($(module)_gen_files))
+$(module)_gen_h_files := $(filter %.h, $($(module)_gen_files))
 $(module)_c_files := $(filter %.c, $(LOCAL_SRC_FILES))
 $(module)_cxx_files := $(filter %.cpp, $(LOCAL_SRC_FILES))
 $(module)_s_files := $(filter %.s, $(LOCAL_SRC_FILES))

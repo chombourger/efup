@@ -19,6 +19,11 @@ LOCAL_C_INCLUDES +=				\
 	external/e2fsprogs/e2fsck		\
 	$(S)/lib
 
+LOCAL_GEN_FILES +=						\
+	out/target/external/e2fsprogs/lib/ext2fs/ext2_err.h	\
+	out/target/external/e2fsprogs/e2fsck/prof_err.h		\
+	out/target/external/e2fsprogs/misc/default_profile.c
+
 LOCAL_SRC_FILES += 						\
 	$(S)/lib/e2p/parse_num.c				\
 	$(S)/lib/et/com_err.c					\
@@ -100,6 +105,7 @@ LOCAL_STATIC_LIBRARIES = blkid uuid
 out/target/external/e2fsprogs/misc/default_profile.c:		\
 	external/e2fsprogs/misc/mke2fs.conf.in			\
 	external/e2fsprogs/misc/profile-to-c.awk
+	$(MKDIR_P) $(dir $@)
 	$(AWK) -f external/e2fsprogs/misc/profile-to-c.awk	\
 		< external/e2fsprogs/misc/mke2fs.conf.in	\
 		> $@
@@ -129,25 +135,21 @@ $(outdir)/external/e2fsprogs/lib/ext2fs/ext2_err.c			\
 $(outdir)/external/e2fsprogs/lib/ext2fs/ext2_err.h:			\
 	$(outdir)/external/e2fsprogs/lib/ext2fs/ext2_err.et		\
 	out/host/external/e2fsprogs/lib/et/compile_et
+	@echo "GEN ext2_err.{c,h} ($(notdir $@))"
 	$(MKDIR_P) $(dir $@)
-	ET_DIR=external/e2fsprogs/lib/et				\
-	out/host/external/e2fsprogs/lib/et/compile_et --build-tree $<
-	mv ext2_err.c $(dir $@)/
-	mv ext2_err.h $(dir $@)/
+	ET_DIR=external/e2fsprogs/lib/et					\
+	out/host/external/e2fsprogs/lib/et/compile_et --build-tree $< &&	\
+	mv -f ext2_err.c ext2_err.h $(dir $@)/
 
-$(outdir)/external/e2fsprogs/e2fsck/prof_err.c				\
-$(outdir)/external/e2fsprogs/e2fsck/prof_err.h:				\
-	external/e2fsprogs/e2fsck/prof_err.et				\
+$(outdir)/external/e2fsprogs/e2fsck/prof_err.c					\
+$(outdir)/external/e2fsprogs/e2fsck/prof_err.h:					\
+	external/e2fsprogs/e2fsck/prof_err.et					\
 	out/host/external/e2fsprogs/lib/et/compile_et
+	@echo "GEN prof_err.{c,h} ($(notdir $@))"
 	$(MKDIR_P) $(dir $@)
-	ET_DIR=external/e2fsprogs/lib/et				\
-	out/host/external/e2fsprogs/lib/et/compile_et --build-tree $<
-	mv prof_err.c $(dir $@)/
-	mv prof_err.h $(dir $@)/
-
-$(outdir)/external/e2fsprogs/misc/mke2fs.o:			\
-	$(outdir)/external/e2fsprogs/lib/ext2fs/ext2_err.h	\
-	$(outdir)/external/e2fsprogs/e2fsck/prof_err.h
+	ET_DIR=external/e2fsprogs/lib/et					\
+	out/host/external/e2fsprogs/lib/et/compile_et --build-tree $< &&	\
+	mv -f prof_err.c prof_err.h $(dir $@)/
 
 include $(BUILD_EXECUTABLE)
 

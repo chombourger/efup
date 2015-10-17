@@ -15,3 +15,4 @@ $(outdir)/lib$(module).a: $($(module)_o_files)
 	$(Q) mkdir -p $(dir $@)
 	$(Q) $(AR) r $@ $^
 
+$($(module)_o_files): $($(module)_gen_c_files) $($(module)_gen_h_files)

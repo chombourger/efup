@@ -12,6 +12,8 @@ sbindir     = @sbindir@
 HOST_CPU = @HOST_CPU@
 HOST_OS  = @HOST_OS@
 
+AWK      = @AWK@
+
 CC       = @CC@
 CFLAGS   = @CFLAGS@
 CPP      = @CPP@
