@@ -46,6 +46,10 @@
 #define	__END_DECLS
 #endif
 
+#ifdef __P
+#undef __P
+#endif
+
 /*
  * The __CONCAT macro is used to concatenate parts of symbol names, e.g.
  * with "#define OLD(foo) __CONCAT(old,foo)", OLD(foo) produces oldfoo.
