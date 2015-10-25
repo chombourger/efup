@@ -116,12 +116,15 @@ static const struct blkid_idinfo *idinfos[] =
 	&vfat_idinfo,
 	&swsuspend_idinfo,
 	&swap_idinfo,
+#if 0
 	&xfs_idinfo,
 	&xfs_log_idinfo,
+#endif
 	&ext4dev_idinfo,
 	&ext4_idinfo,
 	&ext3_idinfo,
 	&ext2_idinfo,
+#if 0
 	&jbd_idinfo,
 	&reiser_idinfo,
 	&reiser4_idinfo,
@@ -150,13 +153,16 @@ static const struct blkid_idinfo *idinfos[] =
 	&squashfs3_idinfo,
 	&netware_idinfo,
 	&btrfs_idinfo,
+#endif
 	&ubifs_idinfo,
+#if 0
 	&bfs_idinfo,
 	&vmfs_fs_idinfo,
 	&befs_idinfo,
 	&nilfs2_idinfo,
 	&exfat_idinfo,
 	&f2fs_idinfo
+#endif
 };
 
 /*
