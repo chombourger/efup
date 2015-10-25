@@ -127,6 +127,9 @@ partmgr_write(void *ctx) {
 
    if (context) {
       result = fdisk_write_disklabel(context);
+      if (result == 0) {
+         result = fdisk_reread_partition_table(context);
+      }
    }
    else result = EBADF;
 
