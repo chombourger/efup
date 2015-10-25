@@ -58,47 +58,6 @@ NSS_SHARED_LIBRARIES :=			\
 
 endif
 
-ifndef WITH_SYSTEM_DIRECTFB
-
-DFB_INCLUDES :=				\
-	external/directfb/include	\
-	external/directfb/lib
-
-DFB_STATIC_LIBRARIES :=			\
-	directfb
-	
-endif
-
-ifndef WITH_SYSTEM_FREETYPE
-
-FREETYPE_C_INCLUDES :=			\
-	external/freetype/include
-
-FREETYPE_STATIC_LIBRARIES :=		\
-	ft2
-
-endif
-
-ifndef WITH_SYSTEM_PNG
-
-PNG_C_INCLUDES := 			\
-	include/png			\
-	external/png			\
-	.
-
-PNG_STATIC_LIBRARIES = png
-
-endif
-
-ifndef WITH_SYSTEM_ZLIB
-
-ZLIB_C_INCLUDES :=			\
-	external/zlib
-
-ZLIB_STATIC_LIBRARIES = z
-
-endif
-
 ##############################################################################
 
 include $(CLEAR_VARS)
@@ -134,18 +93,20 @@ LOCAL_SRC_FILES +=			\
 	src/volume.c			\
 
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS) $(DFB_CFLAGS)
-ifdef WITH_SYSTEM_DIRECTFB
-LOCAL_CFLAGS += -DWITH_SYSTEM_DIRECTFB
-endif
+LOCAL_CFLAGS += $(DO_BUILD_DIRECTFB:%=-DDO_BUILD_DIRECTFB)
 
-LOCAL_LDFLAGS += $(LIBPNG_LDFLAGS) $(ZLIB_LDFLAGS)
-LOCAL_LDLIBS += $(DFB_LIBS) $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(LIBPNG_LDLIBS) $(ZLIB_LDLIBS)
+LOCAL_CFLAGS += $(USE_JPEG:%=-DUSE_JPEG)
+LOCAL_CFLAGS += $(USE_PNG:%=-DUSE_PNG)
+
+LOCAL_LDFLAGS += $(JPEG_LDFLAGS) $(LIBPNG_LDFLAGS) $(ZLIB_LDFLAGS)
+LOCAL_LDLIBS += $(DFB_LIBS) $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(JPEG_LDLIBS) $(LIBPNG_LDLIBS) $(ZLIB_LDLIBS)
 
 LOCAL_STATIC_LIBRARIES += 		\
 	$(LUA_STATIC_LIBRARIES)		\
 	zip				\
 	$(DFB_STATIC_LIBRARIES)		\
 	$(FREETYPE_STATIC_LIBRARIES)	\
+	$(JPEG_STATIC_LIBRARIES)	\
 	$(PNG_STATIC_LIBRARIES)		\
 	$(ZLIB_STATIC_LIBRARIES)	\
 	fdisk				\

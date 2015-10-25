@@ -30,17 +30,26 @@ static int ui_pb_fill_g = 156;
 static int ui_pb_fill_b = 0;
 static int ui_pb_fill_a = 255;
 
-#ifndef WITH_SYSTEM_DIRECTFB
+#ifdef DO_BUILD_DIRECTFB
 void __D_init_all(void);
 void *ref_d_init_all = __D_init_all;
 void directfb_fbdev(void);
 void *ref_directfb_fbdev = directfb_fbdev;
 void directfbwm_default(void);
 void *ref_directfbwm_default = directfbwm_default;
+void IDirectFBFont_FT2_ctor(void);
+void *ref_idirectfbfont_ft2 = IDirectFBFont_FT2_ctor;
+
+#ifdef USE_JPEG
+void IDirectFBImageProvider_JPEG_ctor(void);
+void *ref_idirectfbimageprovider_jpeg = IDirectFBImageProvider_JPEG_ctor;
+#endif
+
+#ifdef USE_PNG
 void IDirectFBImageProvider_PNG_ctor(void);
 void *ref_idirectfbimageprovider_png = IDirectFBImageProvider_PNG_ctor;
-void IDirectFBFont_FT2_ctor(void);
-void *ref_idirectfbfont_png = IDirectFBFont_FT2_ctor;
+#endif
+
 #endif
 
 int

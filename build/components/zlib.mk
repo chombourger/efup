@@ -7,7 +7,10 @@
 ifndef WITH_SYSTEM_ZLIB
 
 include $(CLEAR_VARS)
+
 LOCAL_MODULE := z
+
+LOCAL_VISIBILITY := default
 
 ZLIB = $(LOCAL_PATH)/external/zlib
 

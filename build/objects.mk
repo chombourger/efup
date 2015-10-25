@@ -18,7 +18,9 @@ $(module)_o_files :=					\
 
 clean_targets := $(clean_targets) $($(module)_o_files)
 
-$(module)_cflags   := $(sys_cflags) $(LOCAL_CFLAGS)
+$(module)_cflags := $(sys_cflags) $(LOCAL_CFLAGS)				\
+	-fvisibility=$(if $(LOCAL_VISIBILITY),$(LOCAL_VISIBILITY),hidden)
+
 $(module)_cppflags := $(sys_cppflags) $(LOCAL_CPPFLAGS) $(LOCAL_C_INCLUDES:%=-I%)
 
 $(module)_ldflags  := $(sys_ldflags) $(LOCAL_LDFLAGS)

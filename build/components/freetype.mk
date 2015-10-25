@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
-ifndef WITH_SYSTEM_FREETYPE
+ifdef DO_BUILD_FREETYPE
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := ft2
@@ -108,7 +108,7 @@ LOCAL_SRC_FILES += 			\
 
 include $(BUILD_STATIC_LIBRARY)
 
-endif # WITH_SYSTEM_SDL
+endif # DO_BUILD_FREETYPE
 
 ##############################################################################
 

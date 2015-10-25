@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
-ifndef WITH_SYSTEM_PNG
+ifdef DO_BUILD_PNG
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := png
@@ -39,7 +39,7 @@ LOCAL_SRC_FILES += 		\
 
 include $(BUILD_STATIC_LIBRARY)
 
-endif # WITH_SYSTEM_JPEG
+endif # DO_BUILD_PNG
 
 ##############################################################################
 

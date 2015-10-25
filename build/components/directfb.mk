@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
-ifndef WITH_SYSTEM_DIRECTFB
+ifdef DO_BUILD_DIRECTFB
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := directfb
@@ -30,6 +30,7 @@ LOCAL_C_INCLUDES +=						\
 	$(DFB)/lib						\
 	$(DFB)/src						\
 	$(DFB)/systems						\
+	$(JPEG_C_INCLUDES)					\
 	$(PNG_C_INCLUDES)					\
 	$(FREETYPE_C_INCLUDES)
 
@@ -202,15 +203,22 @@ LOCAL_SRC_FILES += 								\
 	$(DFB)/systems/fbdev/surfacemanager.c					\
 	$(DFB)/systems/fbdev/vt.c						\
 	$(DFB)/wm/default/default.c						\
-	$(DFB)/interfaces/IDirectFBImageProvider/idirectfbimageprovider_png.c	\
 	$(DFB)/interfaces/IDirectFBFont/idirectfbfont_ft2.c
 
+ifdef USE_JPEG
+LOCAL_SRC_FILES += 								\
+	$(DFB)/interfaces/IDirectFBImageProvider/idirectfbimageprovider_jpeg.c
+endif
 
-LOCAL_STATIC_LIBRARIES = $(PNG_STATIC_LIBRARIES)
+ifdef USE_PNG
+LOCAL_SRC_FILES += 								\
+	$(DFB)/interfaces/IDirectFBImageProvider/idirectfbimageprovider_png.c
+endif
+
+LOCAL_STATIC_LIBRARIES = $(JPEG_STATIC_LIBRARIES) $(PNG_STATIC_LIBRARIES)
 
 include $(BUILD_STATIC_LIBRARY)
 
-endif # WITH_SYSTEM_DIRECTFB
+endif # DO_BUILD_DIRECTFB
 
 ##############################################################################
-

@@ -42,13 +42,11 @@ lib$(module).so: module:=$(module)
 lib$(module).so: $($(module)_deps)
 	@echo LD $(module)
 	$(Q) mkdir -p $(dir $@)
-	$(Q) $(CC) -shared -o $@				\
-		$($(module)_cflags)				\
-		$($(module)_o_files) $($(module)_ldflags)	\
-		$($(module)_ldlibs)				\
+	$(Q) $(CC) -shared -o $@					\
+		$($(module)_cflags)					\
+		$($(module)_o_files) $($(module)_ldflags)		\
+		$($(module)_ldlibs)					\
 
 $(D)$(libdir)/lib$(module).so: lib$(module).so
 	$(MKDIR_P) $(dir $@)
 	install -m 755 $< $@
-
-$($(module)_o_files): $($(module)_gen_c_files) $($(module)_gen_h_files)

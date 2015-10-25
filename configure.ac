@@ -17,6 +17,42 @@ AC_CONFIG_HEADERS([	\
 # Default to empty prefix (binaries going to /sbin and /lib)
 AC_PREFIX_DEFAULT()
 
+AC_ARG_ENABLE(directfb,
+	AC_HELP_STRING(
+		[--enable-directfb],
+		[enable DirectFB backend @<:@default=no@:>@]
+	),
+	[],
+	[enable_directfb=no]
+)
+
+AC_ARG_ENABLE(freetype,
+	AC_HELP_STRING(
+		[--enable-freetype],
+		[enable FreeType2 font provider @<:@default=yes@:>@]
+	),
+	[],
+	[enable_freetype=yes]
+)
+
+AC_ARG_ENABLE(jpeg,
+	AC_HELP_STRING(
+		[--enable-jpeg],
+		[build JPEG image provider, @<:@default=no@:>@]
+	),
+	[],
+	[enable_jpeg=no]
+)
+
+AC_ARG_ENABLE(png,
+	AC_HELP_STRING(
+		[--enable-png],
+		[build PNG image provider, @<:@default=yes@:>@]
+	),
+	[],
+	[enable_png=yes]
+)
+
 # Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
@@ -116,32 +152,84 @@ AX_LUA_LIBS(true,true)
 AM_PATH_NSPR
 AM_PATH_NSS
 
+if test x$enable_directfb = xyes; then
+   check_directfb=yes
+   if test x$enable_png = xyes; then
+      check_png=yes
+   fi
+   if test x$enable_freetype = xyes; then
+      check_freetype=yes
+   fi
+   if test x$enable_jpeg = xyes; then
+      check_jpeg=yes
+   fi
+fi
+
 # Check for DirectFB
-DFB_CFLAGS=`pkg-config directfb --cflags`
-DFB_LIBS=`pkg-config directfb --libs`
-AC_SUBST(DFB_CFLAGS)
-AC_SUBST(DFB_LIBS)
+USE_DIRECTFB=
+if test x$check_directfb = xyes; then
+   DFB_CFLAGS=`pkg-config directfb --cflags 2>/dev/null`
+   DFB_LIBS=`pkg-config directfb --libs 2>/dev/null`
+   USE_DIRECTFB=yes
+fi
+
+# Check for FreeType
+USE_FREETYPE=
+if test x$check_freetype = xyes; then
+   FT_CFLAGS=`pkg-config freetype2 --cflags 2>/dev/null`
+   FT_LIBS=`pkg-config freetype2 --libs 2>/dev/null`
+   USE_FREETYPE=yes
+fi
+
+# Check for JPEG
+USE_JPEG=
+if test x$check_jpeg = xyes; then
+   AC_CHECK_LIB(jpeg, jpeg_destroy_decompress,
+      jpeg_ok=yes,
+      jpeg_ok=no)
+   if test "$jpeg_ok" = yes; then
+      AC_CHECK_HEADER(jpeglib.h,
+         jpeg_ok=yes,
+         jpeg_ok=no)
+      if test "$jpeg_ok" = yes; then
+         LIBJPEG='-ljpeg'
+      fi
+   fi
+   USE_JPEG=yes
+fi
 
 # Check for PNG
-PNG=
-AC_ARG_ENABLE(png,
-              AC_HELP_STRING([--enable-png],
-                             [build PNG image provider, @<:@default=yes@:>@]),
-              [], [enable_png=yes])
-if test "$enable_png" = "yes"; then
-  PKG_CHECK_MODULES([LIBPNG], [libpng >= 1.2.2], [PNG=yes], [PNG=])
+USE_PNG=
+if test x$check_png = xyes; then
+   PNG_CFLAGS=`pkg-config libpng --cflags 2>/dev/null`
+   PNG_LIBS=`pkg-config libpng --libs 2>/dev/null`
+   USE_PNG=yes
 fi
+
+AC_SUBST(DFB_CFLAGS)
+AC_SUBST(DFB_LIBS)
+AC_SUBST(USE_DIRECTFB,$USE_DIRECTFB)
+
+AC_SUBST(FT_CFLAGS)
+AC_SUBST(FT_LIBS)
+AC_SUBST(USE_FREETYPE,$USE_FREETYPE)
 
 AC_SUBST(LIBPNG)
 AC_SUBST(LIBPNG_CFLAGS)
 AC_SUBST(LIBPNG_LIBS)
-AC_SUBST(WITH_SYSTEM_PNG,$PNG)
+AC_SUBST(USE_PNG,$USE_PNG)
+
+AC_SUBST(LIBJPEG,$LIBJPEG)
+AC_SUBST(USE_JPEG,$USE_JPEG)
+AM_CONDITIONAL(JPEG_PROVIDER, test "$USE_JPEG" = "yes")
+AC_SUBST(JPEG_PROVIDER)
 
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([		\
 	errno.h			\
 	malloc.h		\
+	mntent.h		\
 	paths.h			\
 	signal.h		\
 	stdarg.h		\
@@ -195,13 +283,16 @@ AC_C_BIGENDIAN
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([	\
 	fsync		\
+	getmntent	\
+	getmntinfo	\
 	llseek		\
-	llseek64	\
+	lseek64		\
 	memalign	\
 	mempcpy		\
 	mmap		\
 	munmap		\
 	nanosleep	\
+	setmntent	\
 	strcasecmp	\
 	sysconf		\
 	usleep		\
@@ -217,7 +308,7 @@ AC_CHECK_LIB(z, zlibVersion, ,
     AC_CHECK_LIB(z, ${ZPREFIX}zlibVersion,[ZLIB=yes],[ZLIB=]))
 AC_SUBST(ZLIB_CFLAGS)
 AC_SUBST(ZLIB_LIBS)
-AC_SUBST(WITH_SYSTEM_ZLIB,$ZLIB)
+AC_SUBST(USE_ZLIB,yes)
 
 # Threads
 THREADFLAGS="-D_REENTRANT"
@@ -274,13 +365,6 @@ if test "$need_libdl" = "yes"; then
 fi
 
 AC_SUBST(DYNLIB)
-
-# JPEG
-JPEG=yes
-LIBJPEG='-ljpeg'
-AM_CONDITIONAL(JPEG_PROVIDER, test "$JPEG" = "yes")
-AC_SUBST(JPEG_PROVIDER)
-AC_SUBST(LIBJPEG)
 
 # DirectFB version
 DIRECTFB_MAJOR_VERSION=1
@@ -345,7 +429,7 @@ if test "$enable_debug_support" = "yes" || test "$enable_debug" = "yes"; then
     CFLAGS="-O2 $CFLAGS"
     DIRECT_BUILD_DEBUGS=1
 else
-    CFLAGS="-O2 -g0 $CFLAGS"
+    CFLAGS="-Os -g0 -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,-O1 $CFLAGS"
     DIRECT_BUILD_DEBUGS=0
 fi
 AM_CONDITIONAL(ENABLE_DEBUGS, test "$enable_debug_support" = "yes")
@@ -522,7 +606,7 @@ AC_CONFIG_FILES([ 										\
   external/directfb/include/directfb_version.h:external/directfb/include/directfb_version.h.in	\
   external/directfb/lib/direct/build.h:external/directfb/lib/direct/build.h.in			\
   external/directfb/lib/fusion/build.h:external/directfb/lib/fusion/build.h.in			\
-  external/e2fsprogs/lib/ext2fs/ext2_types.h:external/e2fsprogs/lib/ext2fs/ext2_types.h.in \
+  external/e2fsprogs/lib/ext2fs/ext2_types.h:external/e2fsprogs/lib/ext2fs/ext2_types.h.in	\
   external/e2fsprogs/util/subst.conf:external/e2fsprogs/util/subst.conf.in			\
   external/zlib/zconf.h:external/zlib/zconf.h.in						\
   settings.mk:settings.in	\

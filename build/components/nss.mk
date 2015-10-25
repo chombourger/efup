@@ -48,6 +48,8 @@ ifndef WITH_SYSTEM_NSPR
 include $(CLEAR_VARS)
 LOCAL_MODULE := nspr$(NSPR_SHLIB_VERSION)
 
+LOCAL_VISIBILITY := default
+
 NSPR = external/nspr/pr
 NSPR_DS = external/nspr/lib/ds
 NSPR_LIBC = external/nspr/lib/libc
@@ -155,7 +157,10 @@ endif # WITH_SYSTEM_NSPR
 ifndef WITH_SYSTEM_NSS
 
 include $(CLEAR_VARS)
+
 LOCAL_MODULE := nss$(NSS_SHLIB_VERSION)
+
+LOCAL_VISIBILITY := default
 
 NSS := external/nss/lib
 
@@ -452,6 +457,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := nssutil$(NSSUTIL_SHLIB_VERSION)
 
+LOCAL_VISIBILITY := default
+
 LOCAL_CFLAGS += -DUSE_UTIL_DIRECTLY $(NSPR_CFLAGS)
 LOCAL_LDLIBS += $(NSPR_LIBS)
 
@@ -496,6 +503,8 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := softokn$(SOFTOKEN_SHLIB_VERSION)
+
+LOCAL_VISIBILITY := default
 
 SOFTOKEN := external/nss/lib/softoken
 
@@ -651,6 +660,7 @@ endif # NSS_DISABLE_ECC
 
 include $(CLEAR_VARS)
 LOCAL_MODULE     := freebl
+LOCAL_VISIBILITY := default
 LOCAL_C_INCLUDES := $(FREEBL_C_INCLUDES)
 LOCAL_CFLAGS     := $(FREEBL_CFLAGS)
 LOCAL_SRC_FILES  := $(NSS)/freebl/loader.c
@@ -661,6 +671,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE     := freebl$(FREEBL_SHLIB_VERSION)
+LOCAL_VISIBILITY := default
 LOCAL_C_INCLUDES := $(FREEBL_C_INCLUDES)
 LOCAL_CFLAGS     := $(FREEBL_CFLAGS)
 LOCAL_LDLIBS     := $(FREEBL_LDLIBS)
@@ -672,6 +683,8 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := nssdbm$(NSSDBM_SHLIB_VERSION)
+
+LOCAL_VISIBILITY := default
 
 NSS_DBM := external/nss/lib/softoken/legacydb
 
@@ -737,6 +750,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := ssl$(SSL_SHLIB_VERSION)
 
+LOCAL_VISIBILITY := default
+
 LOCAL_CFLAGS := $(NSPR_CFLAGS)
 
 LOCAL_C_INCLUDES :=					\
@@ -791,6 +806,8 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := nssckbi
+
+LOCAL_VISIBILITY := default
 
 LOCAL_CFLAGS := $(NSPR_CFLAGS)
 

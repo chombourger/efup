@@ -23,6 +23,7 @@ CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@
 
 STRIP = @STRIP@
+STRIP_FLAGS = -s -R .comment -R .note -R .note.ABI-tag
 
 LUA_INCLUDE = @LUA_INCLUDE@
 LUA_LIB     = @LUA_LIB@
@@ -78,9 +79,10 @@ initramfs: certs.db force
 	$(INSTALL) -m 644 data/*.ttf initramfs/data/
 	(cd initramfs && ln -sf $(sbindir)/efup init)
 	ln -sf efup initramfs/$(sbindir)/init
-	$(STRIP) initramfs$(sbindir)/efup
-	$(STRIP) initramfs$(libdir)/*.so*
-	$(if $(wildcard out/target/bb/_install),						\
+	$(STRIP) $(STRIP_FLAGS) initramfs$(sbindir)/efup
+	$(STRIP) $(STRIP_FLAGS) initramfs$(sbindir)/mke2fs
+	$(STRIP) $(STRIP_FLAGS) initramfs$(libdir)/*.so*
+	$(if $(wildcard out/target/bb/_install),					\
 		cp -ra out/target/bb/_install/* initramfs && )true
 	$(if $(SYSROOT),	\
 		$(MKDIR_P) initramfs/lib &&						\
