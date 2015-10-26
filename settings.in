@@ -2,6 +2,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# Paths
+datarootdir=@datarootdir@
+datadir=@datadir@
+
+host_cpu=@host_cpu@
+
+# opkg
+USE_OPKG=@USE_OPKG@
+
 # DirectFB
 USE_DIRECTFB=@USE_DIRECTFB@
 DIRECTFB_VERSION=@DIRECTFB_VERSION@
@@ -31,3 +40,35 @@ ZLIB_CFLAGS=@ZLIB_CFLAGS@
 ZLIB_LIBS=@ZLIB_LIBS@
 ZLIB_LDFLAGS:=$(filter-out -l%,$(ZLIB_LIBS))
 ZLIB_LDLIBS:=$(filter -l%,$(ZLIB_LIBS))
+
+# archive
+USE_ARCHIVE=@USE_ARCHIVE@
+ARCHIVE_CFLAGS=@ARCHIVE_CFLAGS@
+ARCHIVE_LIBS=@ARCHIVE_LIBS@
+ARCHIVE_LDFLAGS:=$(filter-out -l%,$(ARCHIVE_LIBS))
+ARCHIVE_LDLIBS:=$(filter -l%,$(ARCHIVE_LIBS))
+
+# NSPR
+USE_NSPR=@USE_NSPR@
+NSPR_CFLAGS=@NSPR_CFLAGS@
+NSPR_LIBS=@NSPR_LIBS@
+NSPR_LDFLAGS:=$(filter-out -l%,$(NSPR_LIBS))
+NSPR_LDLIBS:=$(filter -l%,$(NSPR_LIBS))
+
+# NSS
+USE_NSS=@USE_NSS@
+NSS_CFLAGS=@NSS_CFLAGS@
+NSS_LIBS=@NSS_LIBS@
+NSS_LDFLAGS:=$(filter-out -l%,$(NSS_LIBS))
+NSS_LDLIBS:=$(filter -l%,$(NSS_LIBS))
+
+# curl
+USE_CURL=@USE_CURL@
+CURL_CFLAGS=@CURL_CFLAGS@
+CURL_LIBS=@CURL_LIBS@
+CURL_LDFLAGS:=$(filter-out -l%,$(CURL_LIBS))
+CURL_LDLIBS:=$(filter -l%,$(CURL_LIBS))
+
+# opkg
+USE_OPKG=@USE_OPKG@
+OPKG_VERSION=@OPKG_VERSION@

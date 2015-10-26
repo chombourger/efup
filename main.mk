@@ -6,16 +6,18 @@
 
 extra_sys_libs :=
 
+SHLIB_PREFIX=lib
+SHLIB_SUFFIX=so
+
+##############################################################################
+# Lua                                                                        #
+##############################################################################
+
 ifdef LUA_INCLUDE
-WITH_SYSTEM_LUA:=1
-endif
-
-ifdef NSPR_LIBS
-WITH_SYSTEM_NSPR:=1
-endif
-
-ifdef NSS_LIBS
-WITH_SYSTEM_NSS:=1
+WITH_SYSTEM_LUA      := 1
+else
+LUA_C_INCLUDES       := external/lua/src
+LUA_STATIC_LIBRARIES := lua
 endif
 
 ##############################################################################
@@ -67,7 +69,7 @@ endif
 
 ifdef USE_PNG
 ifdef LIBPNG_LIBS
-extra_sys_libs += png
+extra_sys_libs       += png
 else
 DO_BUILD_PNG         := 1
 PNG_C_INCLUDES       := include/png external/png .
@@ -85,6 +87,92 @@ else
 DO_BUILD_ZLIB         := 1
 ZLIB_C_INCLUDES       := external/zlib
 ZLIB_STATIC_LIBRARIES := z
+endif
+
+##############################################################################
+# archive                                                                    #
+##############################################################################
+
+ifdef USE_ARCHIVE
+ifdef ARCHIVE_LIBS
+extra_sys_libs           += archive
+else
+DO_BUILD_ARCHIVE         := 1
+ARCHIVE_C_INCLUDES       := external/libarchive/libarchive
+ARCHIVE_STATIC_LIBRARIES := archive
+endif
+endif
+
+##############################################################################
+# NSPR                                                                       #
+##############################################################################
+
+ifdef USE_NSPR
+ifdef NSPR_LIBS
+extra_sys_libs        += $(patsubst -l%,%,$(NSPR_LIBS))
+else
+DO_BUILD_NSPR         := 1
+NSPR_SHLIB_VERSION    := 4
+NSPR_C_INCLUDES       := .
+NSPR_C_INCLUDES       += include/nspr
+NSPR_C_INCLUDES       += external/nspr/pr/include
+NSPR_C_INCLUDES       += external/nspr/lib/ds
+NSPR_C_INCLUDES       += external/nspr/lib/libc/include
+NSPR_SHARED_LIBRARIES := nspr$(NSPR_SHLIB_VERSION) pthread dl
+endif
+endif
+
+##############################################################################
+# NSS                                                                        #
+##############################################################################
+
+ifdef USE_NSS
+ifdef NSS_LIBS
+extra_sys_libs         += $(patsubst -l%,%,$(NSS_LIBS))
+else
+DO_BUILD_NSS           := 1
+FREEBL_SHLIB_VERSION   := 3
+NSS_SHLIB_VERSION      := 3
+NSSDBM_SHLIB_VERSION   := 3
+NSSUTIL_SHLIB_VERSION  := 3
+SOFTOKEN_SHLIB_VERSION := 3
+SSL_SHLIB_VERSION      :=3
+NSS_C_INCLUDES         := external/nss/lib/certdb
+NSS_C_INCLUDES         += external/nss/lib/certhigh
+NSS_C_INCLUDES         += external/nss/lib/cryptohi
+NSS_C_INCLUDES         += external/nss/lib/nss
+NSS_C_INCLUDES         += external/nss/lib/pkcs7
+NSS_C_INCLUDES         += external/nss/lib/pk11wrap
+NSS_C_INCLUDES         += external/nss/lib/smime
+NSS_C_INCLUDES         += external/nss/lib/ssl
+NSS_C_INCLUDES         += external/nss/lib/util
+NSS_SHARED_LIBRARIES   := nss$(NSS_SHLIB_VERSION)
+NSS_SHARED_LIBRARIES   += nssutil$(NSSUTIL_SHLIB_VERSION)
+NSS_SHARED_LIBRARIES   += freebl$(FREEBL_SHLIB_VERSION)
+NSS_SHARED_LIBRARIES   += ssl$(SSL_SHLIB_VERSION)
+endif
+endif
+
+##############################################################################
+# curl                                                                       #
+##############################################################################
+
+ifdef USE_CURL
+ifdef CURL_LIBS
+extra_sys_libs        += curl
+else
+DO_BUILD_CURL         := 1
+CURL_C_INCLUDES       := external/curl/include
+CURL_STATIC_LIBRARIES := curl
+endif
+endif
+
+##############################################################################
+# opkg                                                                       #
+##############################################################################
+
+ifdef USE_OPKG
+DO_BUILD_OPKG := 1
 endif
 
 include build/build.mk

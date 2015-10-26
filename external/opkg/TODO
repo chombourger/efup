@@ -1,0 +1,26 @@
+BUGS
+====
+
+See issue list: http://code.google.com/p/opkg/issues/list
+
+ * Resolve 'XXX', 'FIXME' and 'TODO' comments in the code.
+
+ * Remove dead and duplicate code. Refactor duplicated functionality.
+
+ * Remove pkg_info_preinstall_check().
+
+ * Reduce memory used per pkg_t and peak memory use in general.
+
+ * Refactor opkg_install_pkg() into more precise functions.
+
+ * pkg_hash_fetch_best_installation_candidate() is linear search O(P*PN)
+   and is slow (frequently called).
+      P provider
+      PN pkgs in a provider
+   It can be O(P) if a hash table is used.
+
+FEATURES
+========
+
+ * Improve dpkg compatibility, according to the Debian Policy Manual.
+   http://www.debian.org/doc/debian-policy/ch-controlfields.html

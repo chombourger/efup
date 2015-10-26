@@ -19,6 +19,7 @@ initramfs
 initramfs.cpio
 initramfs.gz
 mke2fs
+opkg
 parse-types.log
 *.o
 *.so

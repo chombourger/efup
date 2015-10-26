@@ -43,7 +43,7 @@ endif
 
 ###################################### NSPR ##################################
 
-ifndef WITH_SYSTEM_NSPR
+ifdef DO_BUILD_NSPR
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := nspr$(NSPR_SHLIB_VERSION)
@@ -149,12 +149,11 @@ endif # Linux
 
 include $(BUILD_SHARED_LIBRARY)
 
-endif # WITH_SYSTEM_NSPR
-
+endif # DO_BUILD_NSPR
 
 ###################################### NSS ###################################
 
-ifndef WITH_SYSTEM_NSS
+ifdef DO_BUILD_NSS
 
 include $(CLEAR_VARS)
 
@@ -796,6 +795,7 @@ LOCAL_SRC_FILES :=					\
 	$(NSS)/ssl/ssl3ecc.c				\
 	$(NSS)/ssl/unix_err.c				\
 
+LOCAL_STATIC_LIBRARIES += freebl
 LOCAL_LDLIBS += $(NSPR_LIBS)
 LOCAL_SHARED_LIBRARIES += $(NSPR_SHARED_LIBRARIES)
 
@@ -844,6 +844,6 @@ out/target/$(NSS)/ckfw/builtins/certdata.c:	\
 
 include $(BUILD_SHARED_LIBRARY)
 
-endif # WITH_SYSTEM_NSS
+endif # DO_BUILD_NSS
 
 ##############################################################################

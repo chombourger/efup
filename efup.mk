@@ -4,59 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ##############################################################################
 
-SHLIB_PREFIX=lib
-SHLIB_SUFFIX=so
-
-ifndef WITH_SYSTEM_LUA
-
-LUA_C_INCLUDES :=			\
-	external/lua/src		\
-
-LUA_STATIC_LIBRARIES :=			\
-	lua
-
-endif
-
-ifndef WITH_SYSTEM_NSPR
-
-NSPR_SHLIB_VERSION=4
-
-NSPR_C_INCLUDES :=			\
-	.				\
-	include/nspr			\
-	external/nspr/pr/include	\
-	external/nspr/lib/ds		\
-	external/nspr/lib/libc/include	\
-
-NSPR_SHARED_LIBRARIES :=		\
-	nspr$(NSPR_SHLIB_VERSION)	\
-	pthread dl			\
-
-endif # WITH_SYSTEM_NSPR
-
-ifndef WITH_SYSTEM_NSS
-
-FREEBL_SHLIB_VERSION=3
-NSS_SHLIB_VERSION=3
-NSSDBM_SHLIB_VERSION=3
-NSSUTIL_SHLIB_VERSION=3
-SOFTOKEN_SHLIB_VERSION=3
-SSL_SHLIB_VERSION=3
-
-NSS_C_INCLUDES :=			\
-	external/nss/lib/certdb		\
-	external/nss/lib/cryptohi	\
-	external/nss/lib/nss		\
-	external/nss/lib/pk11wrap	\
-	external/nss/lib/smime		\
-	external/nss/lib/util		\
-
-NSS_SHARED_LIBRARIES :=			\
-	nss$(NSS_SHLIB_VERSION)		\
-	nssutil$(NSSUTIL_SHLIB_VERSION)	\
-	freebl$(FREEBL_SHLIB_VERSION)	\
-
-endif
 
 ##############################################################################
 
@@ -88,29 +35,41 @@ LOCAL_SRC_FILES +=			\
 	src/source.c			\
 	src/source_local_folder.c	\
 	src/source_local_zip.c		\
-	src/ui/directfb.c		\
+	$(if $(USE_DIRECTFB),		\
+		src/ui/directfb.c,	\
+		src/ui/none.c		\
+	)				\
 	src/verifier/nss.c		\
 	src/volume.c			\
 
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS) $(DFB_CFLAGS)
 LOCAL_CFLAGS += $(DO_BUILD_DIRECTFB:%=-DDO_BUILD_DIRECTFB)
 
+LOCAL_CFLAGS += $(DO_BUILD_OPKG:%=-DUSE_OPKG)
 LOCAL_CFLAGS += $(USE_JPEG:%=-DUSE_JPEG)
 LOCAL_CFLAGS += $(USE_PNG:%=-DUSE_PNG)
 
 LOCAL_LDFLAGS += $(JPEG_LDFLAGS) $(LIBPNG_LDFLAGS) $(ZLIB_LDFLAGS)
-LOCAL_LDLIBS += $(DFB_LIBS) $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(JPEG_LDLIBS) $(LIBPNG_LDLIBS) $(ZLIB_LDLIBS)
+LOCAL_LDLIBS  += $(DFB_LIBS) $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(JPEG_LDLIBS) $(LIBPNG_LDLIBS) $(ZLIB_LDLIBS)
 
-LOCAL_STATIC_LIBRARIES += 		\
-	$(LUA_STATIC_LIBRARIES)		\
-	zip				\
-	$(DFB_STATIC_LIBRARIES)		\
-	$(FREETYPE_STATIC_LIBRARIES)	\
-	$(JPEG_STATIC_LIBRARIES)	\
-	$(PNG_STATIC_LIBRARIES)		\
-	$(ZLIB_STATIC_LIBRARIES)	\
-	fdisk				\
-	uuid				\
+LOCAL_STATIC_LIBRARIES += 			\
+	$(LUA_STATIC_LIBRARIES)			\
+	zip					\
+	$(DFB_STATIC_LIBRARIES)			\
+	$(FREETYPE_STATIC_LIBRARIES)		\
+	$(JPEG_STATIC_LIBRARIES)		\
+	$(PNG_STATIC_LIBRARIES)			\
+	$(if $(DO_BUILD_OPKG),			\
+		opkgprog			\
+		opkglib				\
+		$(CURL_STATIC_LIBRARIES)	\
+		$(ARCHIVE_STATIC_LIBRARIES)	\
+	)					\
+	$(ZLIB_STATIC_LIBRARIES)		\
+	$(DO_BUILD_OPKG:%=opkgprog)		\
+	$(DO_BUILD_OPKG:%=opkglib)		\
+	fdisk					\
+	uuid					\
 	blkid
 
 LOCAL_SHARED_LIBRARIES :=		\

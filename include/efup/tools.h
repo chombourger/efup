@@ -9,3 +9,6 @@
 TOOL(efup)
 TOOL(init)
 
+#ifdef USE_OPKG
+TOOL(opkg)
+#endif

@@ -128,7 +128,7 @@ main(int argc, char **argv) {
 
     /* Lookup requested tool. */
     for (i = 0; tools[i].name; i++) {
-        if (!strcmp(tools[i].name, name)) {
+        if ((tools[i].main != NULL) && (!strcmp(tools[i].name, name))) {
             return tools[i].main(argc, argv);
         }
     }

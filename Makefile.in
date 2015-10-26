@@ -25,9 +25,6 @@ CXXFLAGS = @CXXFLAGS@
 STRIP = @STRIP@
 STRIP_FLAGS = -s -R .comment -R .note -R .note.ABI-tag
 
-LUA_INCLUDE = @LUA_INCLUDE@
-LUA_LIB     = @LUA_LIB@
-
 NSPR_CFLAGS = @NSPR_CFLAGS@
 NSPR_LIBS   = @NSPR_LIBS@
 
@@ -79,6 +76,7 @@ initramfs: certs.db force
 	$(INSTALL) -m 644 data/*.ttf initramfs/data/
 	(cd initramfs && ln -sf $(sbindir)/efup init)
 	ln -sf efup initramfs/$(sbindir)/init
+	$(if $(DO_BUILD_OPKG),ln -sf efup initramfs/$(sbindir)/opkg,true)
 	$(STRIP) $(STRIP_FLAGS) initramfs$(sbindir)/efup
 	$(STRIP) $(STRIP_FLAGS) initramfs$(sbindir)/mke2fs
 	$(STRIP) $(STRIP_FLAGS) initramfs$(libdir)/*.so*
