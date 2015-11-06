@@ -13,7 +13,7 @@ LOCAL_MODULE := efup
 LOCAL_C_INCLUDES += 				\
 	.					\
 	include					\
-	include/libzip				\
+	$(ARCHIVE_C_INCLUDES)			\
 	$(LUA_C_INCLUDES)			\
 	$(NSS_C_INCLUDES)			\
 	$(NSPR_C_INCLUDES)			\
@@ -54,7 +54,6 @@ LOCAL_LDLIBS  += $(DFB_LIBS) $(LUA_LIB) $(NSS_LIBS) $(NSPR_LIBS) $(JPEG_LDLIBS) 
 
 LOCAL_STATIC_LIBRARIES += 			\
 	$(LUA_STATIC_LIBRARIES)			\
-	zip					\
 	$(DFB_STATIC_LIBRARIES)			\
 	$(FREETYPE_STATIC_LIBRARIES)		\
 	$(JPEG_STATIC_LIBRARIES)		\
@@ -63,8 +62,8 @@ LOCAL_STATIC_LIBRARIES += 			\
 		opkgprog			\
 		opkglib				\
 		$(CURL_STATIC_LIBRARIES)	\
-		$(ARCHIVE_STATIC_LIBRARIES)	\
 	)					\
+	$(ARCHIVE_STATIC_LIBRARIES)		\
 	$(ZLIB_STATIC_LIBRARIES)		\
 	$(DO_BUILD_OPKG:%=opkgprog)		\
 	$(DO_BUILD_OPKG:%=opkglib)		\
@@ -78,70 +77,6 @@ LOCAL_SHARED_LIBRARIES :=		\
 	dl m pthread rt stdc++
 
 include $(BUILD_EXECUTABLE)
-
-##################################### LIBZIP #################################
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := zip
-
-LIBZIP = $(LOCAL_PATH)/external/libzip/lib
-
-LOCAL_C_INCLUDES += 					\
-	$(LOCAL_PATH)/include/libzip			\
-	$(ZLIB_C_INCLUDES)
-
-LOCAL_SRC_FILES += 					\
-	$(LIBZIP)/mkstemp.c				\
-	$(LIBZIP)/zip_close.c				\
-	$(LIBZIP)/zip_dirent.c				\
-	$(LIBZIP)/zip_discard.c				\
-	$(LIBZIP)/zip_entry.c				\
-	$(LIBZIP)/zip_err_str.c				\
-	$(LIBZIP)/zip_error.c				\
-	$(LIBZIP)/zip_error_get.c			\
-	$(LIBZIP)/zip_error_get_sys_type.c		\
-	$(LIBZIP)/zip_extra_field.c			\
-	$(LIBZIP)/zip_fclose.c				\
-	$(LIBZIP)/zip_fdopen.c				\
-	$(LIBZIP)/zip_file_get_offset.c			\
-	$(LIBZIP)/zip_filerange_crc.c			\
-	$(LIBZIP)/zip_fopen.c				\
-	$(LIBZIP)/zip_fopen_index.c			\
-	$(LIBZIP)/zip_fopen_index_encrypted.c		\
-	$(LIBZIP)/zip_fread.c				\
-	$(LIBZIP)/zip_get_archive_flag.c		\
-	$(LIBZIP)/zip_get_compression_implementation.c	\
-	$(LIBZIP)/zip_get_encryption_implementation.c	\
-	$(LIBZIP)/zip_get_name.c			\
-	$(LIBZIP)/zip_memdup.c				\
-	$(LIBZIP)/zip_name_locate.c			\
-	$(LIBZIP)/zip_new.c				\
-	$(LIBZIP)/zip_open.c				\
-	$(LIBZIP)/zip_set_archive_comment.c		\
-	$(LIBZIP)/zip_source_buffer.c			\
-	$(LIBZIP)/zip_source_close.c			\
-	$(LIBZIP)/zip_source_crc.c			\
-	$(LIBZIP)/zip_source_deflate.c			\
-	$(LIBZIP)/zip_source_error.c			\
-	$(LIBZIP)/zip_source_filep.c			\
-	$(LIBZIP)/zip_source_free.c			\
-	$(LIBZIP)/zip_source_function.c			\
-	$(LIBZIP)/zip_source_layered.c			\
-	$(LIBZIP)/zip_source_open.c			\
-	$(LIBZIP)/zip_source_pkware.c			\
-	$(LIBZIP)/zip_source_pop.c			\
-	$(LIBZIP)/zip_source_read.c			\
-	$(LIBZIP)/zip_source_stat.c			\
-	$(LIBZIP)/zip_source_zip_new.c			\
-	$(LIBZIP)/zip_source_window.c			\
-	$(LIBZIP)/zip_stat.c				\
-	$(LIBZIP)/zip_stat_index.c			\
-	$(LIBZIP)/zip_stat_init.c			\
-	$(LIBZIP)/zip_string.c				\
-	$(LIBZIP)/zip_unchange_data.c			\
-	$(LIBZIP)/zip_utf-8.c				\
-
-include $(BUILD_STATIC_LIBRARY)
 
 ##############################################################################
 

@@ -238,11 +238,10 @@ if test x$check_png = xyes; then
 fi
 
 # Check for archive
-USE_ARCHIVE=
+USE_ARCHIVE=yes
 if test x$check_archive = xyes; then
    ARCHIVE_CFLAGS=`pkg-config libarchive --cflags 2>/dev/null`
    ARCHIVE_LIBS=`pkg-config libarchive --libs 2>/dev/null`
-   USE_ARCHIVE=yes
 fi
 
 # Check for NSPR

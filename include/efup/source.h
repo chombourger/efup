@@ -5,6 +5,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdint.h>
 
 struct source;
 typedef struct source source_t;
@@ -16,8 +17,8 @@ struct source {
     void (* destroy)(source_t *sourcep);
     int (* verify)(source_t *sourcep);
     int  (* load)(source_t *sourcep, const char *path, void **bufferp, size_t *sizep);
-    unsigned long long (* size)(source_t *sourcep, const char *path);
-    source_file_t *(* open)(source_t *sourcep, const char *path);
+    uint64_t (* size)(source_t *sourcep, const char *path);
+    source_file_t *(* open)(source_t *sourcep, const char *path, uint64_t *sizep);
     int (* read)(source_file_t *filep, void *buf, size_t size);
     void (* close)(source_file_t *filep);
 };

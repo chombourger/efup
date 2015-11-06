@@ -6,7 +6,8 @@
 #include <efup/ui.h>
 #include <efup/verifier.h>
 
-#include "external/libzip/lib/zip.h"
+#include <archive.h>
+#include <archive_entry.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -20,19 +21,19 @@
 struct zip_source {
     source_t source;
     const char *path;
-    struct zip *zip;
 };
 
 struct source_file {
     struct zip_source *sourcep;
-    struct zip_file *filep;
+    struct archive *zip;
+    struct archive_entry *filep;
 };
 
 static void source_zip_destroy(source_t *sourcep);
 static int source_zip_verify(source_t *sourcep);
-static unsigned long long source_zip_size(source_t *sourcep, const char *path);
+static uint64_t source_zip_size(source_t *sourcep, const char *path);
 static int source_zip_load(source_t *sourcep, const char *path, void **bufferp, size_t *sizep);
-static source_file_t *source_zip_open(source_t *sourcep, const char *path);
+static source_file_t *source_zip_open(source_t *sourcep, const char *path, uint64_t *sizep);
 static int source_zip_read(source_file_t *filep, void *buf, size_t size);
 static void source_zip_close(source_file_t *filep);
 
@@ -46,48 +47,64 @@ static const source_t zip_source_vtable = {
     source_zip_close
 };
 
+static struct archive *
+zip_open(const char *specp) {
+   struct archive *zip;
+   int result;
+
+   zip = archive_read_new();
+   if (zip != NULL) {
+      archive_read_support_format_zip(zip);
+      result = archive_read_open_filename(zip, specp, 10240);
+      if (result != 0) {
+         archive_read_free(zip);
+         zip = NULL;
+      }
+   }
+   return zip;
+}
+
 int
 source_local_zip(const char *specp, source_t **sourcep) {
     struct zip_source *zip_source;
-    struct zip *zip;
+    struct archive *zip;
     int result;
 
-    /* Parse the opened zip file. */
-    zip = zip_open(specp, 0, &result);
+    zip = zip_open(specp);
+    /* Success? */
     if (zip != NULL) {
-        /* Success, allocate and fill source structure. */
+        /* Allocate and fill source structure. */
         zip_source = malloc(sizeof(*zip_source));
         if (zip_source != NULL) {
             memcpy(&zip_source->source, &zip_source_vtable, sizeof(zip_source_vtable));
-            zip_source->path  = strdup(specp);
-            zip_source->zip   = zip;
+            zip_source->path = strdup(specp);
             if (zip_source->path != NULL) {
                 *sourcep = &zip_source->source;
                 result = 0;
             }
             else {
-                zip_close(zip);
                 free(zip_source);
                 result = ENOMEM;
             }
         }
         else {
             /* Out of memory, close zip and set error code. */
-            zip_close(zip);
             result = ENOMEM;
         }
+        archive_read_free(zip);
     }
+    else result = errno;
 
     return result;
 }
 
 static void source_zip_destroy(source_t *sourcep) {
-    struct zip_source *zip_source = (struct zip_source *) sourcep;
+   struct zip_source *zip_source = (struct zip_source *) sourcep;
 
-    if (zip_source != NULL) {
-        zip_close(zip_source->zip);
-        free(zip_source);
-    }
+   if (zip_source != NULL) {
+      free((void *)zip_source->path);
+      free(zip_source);
+   }
 }
 
 static int
@@ -130,79 +147,95 @@ source_zip_verify(source_t *sourcep) {
    return result;
 }
 
-static unsigned long long
+static uint64_t
 source_zip_size(source_t *sourcep, const char *path) {
    struct zip_source *zip_source = (struct zip_source *) sourcep;
-   struct zip_stat zips;
-   int result;
+   struct archive *zip;
+   struct archive_entry *entry;
+   int64_t size = -1;
 
    if ((sourcep != NULL) && (path != NULL)) {
-      result = zip_stat(zip_source->zip, path, ZIP_FL_UNCHANGED, &zips);
-      if (result == 0) {
-         return zips.size;
+      zip = zip_open(zip_source->path);
+      if (zip != NULL) {
+         while (archive_read_next_header(zip, &entry) == ARCHIVE_OK) {
+            if (strcmp(archive_entry_pathname(entry), path) == 0) {
+               size = archive_entry_size(entry);
+            }
+         }
+         archive_read_free(zip);
       }
    }
 
-   return (unsigned long long) -1;
+   return size;
 }
  
 static int source_zip_load(source_t *sourcep, const char *path, void **bufferp, size_t *sizep) {
-    struct zip_source *zip_source = (struct zip_source *) sourcep;
-    char *script_buffer = NULL, *read_buffer;
-    struct zip_file *zipf;
-    struct zip_stat zips;
-    int result;
+   struct zip_source *zip_source = (struct zip_source *) sourcep;
+   char *script_buffer = NULL;
+   struct archive *zip;
+   struct archive_entry *entry;
+   size_t size, read_bytes;
+   int result;
 
-    if ((sourcep != NULL) && (path != NULL) && (bufferp != NULL)) {
-        result = zip_stat(zip_source->zip, path, ZIP_FL_UNCHANGED, &zips);
-        if (result == 0) {
-            script_buffer = malloc(zips.size + 1);
-            if (script_buffer != NULL) {
-                script_buffer[zips.size] = '\0';
-                zipf = zip_fopen_index(zip_source->zip, zips.index, ZIP_FL_UNCHANGED);
-                if (zipf != NULL) {
-                    zip_uint64_t remaining = zips.size;
-                    read_buffer = script_buffer;
-                    while (remaining > 0) {
-                        int n = zip_fread(zipf, read_buffer, 1024);
-                        if (n >= 0) {
-                            remaining -= n;
-                            read_buffer += n;
-                        }
-                    }
-                    zip_fclose(zipf);
-                    *bufferp = script_buffer;
-                    if (sizep != NULL) *sizep = zips.size;
-                }
-                else zip_error_get(zip_source->zip, &result, NULL);
+   if ((sourcep != NULL) && (path != NULL) && (bufferp != NULL)) {
+      zip = zip_open(zip_source->path);
+      if (zip != NULL) {
+         result = ENOENT;
+         while (archive_read_next_header(zip, &entry) == ARCHIVE_OK) {
+            if (strcmp(archive_entry_pathname(entry), path) == 0) {
+               result = 0;
+               size = archive_entry_size(entry);
+               if (sizep != NULL) *sizep = size;
+               script_buffer = malloc(size + 1);
+               if (script_buffer != NULL) {
+                  script_buffer[size] = '\0';
+                  read_bytes = archive_read_data(zip, script_buffer, size);
+                  if ((read_bytes < 0) || (read_bytes != size)) {
+                     free(script_buffer);
+                     result = EIO;
+                  }
+                  else if (bufferp != NULL) *bufferp = script_buffer;
+               }
+               else result = ENOMEM;
+               break;
             }
-            else result = ENOMEM;
-        }
-        else zip_error_get(zip_source->zip, &result, NULL);
-    }
-    else result = EINVAL;
+         }
+         archive_read_free(zip);
+      }
+      else result = EBADF;
+   }
+   else result = EINVAL;
 
-    return result;
+   return result;
 }
 
 static source_file_t *
-source_zip_open(source_t *sourcep, const char *path) {
-    struct zip_source *zip_source = (struct zip_source *) sourcep;
-    struct zip_file *zipf;
-    struct source_file *file = NULL;
+source_zip_open(source_t *sourcep, const char *path, uint64_t *sizep) {
+   struct zip_source *zip_source = (struct zip_source *) sourcep;
+   source_file_t *file = NULL;
+   struct archive *zip;
+   struct archive_entry *entry;
 
-    if ((sourcep != NULL) && (path != NULL)) {
-        zipf = zip_fopen(zip_source->zip, path, ZIP_FL_UNCHANGED);
-        if (zipf != NULL) {
-            file = malloc(sizeof(*file));
-            if (file != NULL) {
-                file->sourcep = zip_source;
-                file->filep = zipf;
+   if ((sourcep != NULL) && (path != NULL)) {
+      zip = zip_open(zip_source->path);
+      if (zip != NULL) {
+         while (archive_read_next_header(zip, &entry) == ARCHIVE_OK) {
+            if (strcmp(archive_entry_pathname(entry), path) == 0) {
+               if (sizep != NULL) *sizep = archive_entry_size(entry);
+               file = malloc(sizeof(*file));
+               if (file != NULL) {
+                  file->sourcep = zip_source;
+                  file->zip = zip;
+                  file->filep = entry;
+                  return file;
+               }
+               break;
             }
-        }
-    }
-
-    return file; 
+         }
+         archive_read_free(zip);
+      }
+   }
+   return NULL;
 }
 
 static int
@@ -210,10 +243,7 @@ source_zip_read(source_file_t *filep, void *buf, size_t size) {
    int result;
 
    if (filep != NULL) {
-       result = zip_fread(filep->filep, buf, size);
-       if (result == -1) {
-           errno = EIO;
-       }
+       result = archive_read_data(filep->zip, buf, size);
    }
    else {
        result = -1;
@@ -225,9 +255,9 @@ source_zip_read(source_file_t *filep, void *buf, size_t size) {
 
 static void
 source_zip_close(source_file_t *filep) {
-    if (filep != NULL) {
-        zip_fclose(filep->filep);
-        free(filep);
-    }
+   if (filep != NULL) {
+      archive_read_close(filep->zip);
+      free(filep);
+   } 
 }
 

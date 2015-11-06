@@ -24,6 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define _GNU_SOURCE 1
+
 #include "archive_platform.h"
 __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_support_format_zip.c 201102 2009-12-28 03:11:36Z kientzle $");
 
@@ -75,6 +77,7 @@ struct zip {
 	size_t			central_directory_size;
 	size_t			central_directory_entries;
 	char			have_central_directory;
+	int64_t			start_offset;
 	int64_t			offset;
 
 	/* List of entries (seekable Zip only) */
@@ -232,6 +235,32 @@ archive_read_support_format_zip(struct archive *a)
 	return (archive_read_support_format_zip_seekable(a));
 }
 
+static int64_t
+archive_read_format_zip_find_start(struct archive_read *a) {
+	int64_t start_offset;
+	ssize_t avail;
+	const char *p, *match;
+
+	start_offset = __archive_read_seek(a, 0, SEEK_CUR);
+	if ((p = __archive_read_ahead(a, 4, NULL)) == NULL)
+		return -1;
+
+	/* Magic found at the very beginning of the file? */
+	if (memcmp(p, "PK\003\004", 4) != 0) {
+		/* No, search a little bit further... */
+		if ((p = __archive_read_ahead(a, 8 * 1024, &avail)) == NULL)
+			return -1;
+
+		match = memmem(p, avail, "PK\003\004", 4);
+		if (match != NULL) {
+			start_offset += (int64_t)(match - p);
+		}
+		else start_offset = -1;
+	}
+
+	return start_offset;
+}
+
 /*
  * TODO: This is a performance sink because it forces the read core to
  * drop buffered data from the start of file, which will then have to
@@ -245,13 +274,20 @@ static int
 archive_read_format_zip_seekable_bid(struct archive_read *a, int best_bid)
 {
 	struct zip *zip = (struct zip *)a->format->data;
-	int64_t filesize;
+	int64_t filesize, start_offset;
 	const char *p;
 
 	/* If someone has already bid more than 32, then avoid
 	   trashing the look-ahead buffers with a seek. */
 	if (best_bid > 32)
 		return (-1);
+
+	/* Determine start of the zip archive. */
+	start_offset = archive_read_format_zip_find_start(a);
+
+	/* Do not bid if it could not be found. */
+	if (start_offset < 0)
+		return 0;
 
 	filesize = __archive_read_seek(a, -22, SEEK_END);
 	/* If we can't seek, then we can't bid. */
@@ -310,6 +346,7 @@ archive_read_format_zip_seekable_bid(struct archive_read *a, int best_bid)
 	/* Since we've already done the hard work of finding the
 	   end of central directory record, let's save the important
 	   information. */
+	zip->start_offset = start_offset;
 	zip->central_directory_entries = archive_le16dec(p + 10);
 	zip->central_directory_size = archive_le32dec(p + 12);
 	zip->central_directory_offset = archive_le32dec(p + 16);
@@ -410,7 +447,6 @@ static int
 slurp_central_directory(struct archive_read *a, struct zip *zip)
 {
 	unsigned i;
-	int64_t correction;
 	static const struct archive_rb_tree_ops rb_ops = {
 		&cmp_node, &cmp_key
 	};
@@ -418,17 +454,9 @@ slurp_central_directory(struct archive_read *a, struct zip *zip)
 		&rsrc_cmp_node, &rsrc_cmp_key
 	};
 
-	/*
-	 * Consider the archive file we are reading may be SFX.
-	 * So we have to calculate a SFX header size to revise
-	 * ZIP header offsets.
-	 */
-	correction = zip->end_of_central_directory_offset -
-	    (zip->central_directory_offset + zip->central_directory_size);
 	/* The central directory offset is relative value, and so
 	 * we revise this offset for SFX. */
-	zip->central_directory_offset += correction;
-
+	zip->central_directory_offset += zip->start_offset;
 	__archive_read_seek(a, zip->central_directory_offset, SEEK_SET);
 	zip->offset = zip->central_directory_offset;
 	__archive_rb_tree_init(&zip->tree, &rb_ops);
@@ -466,7 +494,7 @@ slurp_central_directory(struct archive_read *a, struct zip *zip)
 		/* internal_attributes = archive_le16dec(p + 36); */ /* text bit */
 		external_attributes = archive_le32dec(p + 38);
 		zip_entry->local_header_offset =
-		    archive_le32dec(p + 42) + correction;
+		    archive_le32dec(p + 42) + zip->start_offset;
 
 		/* If we can't guess the mode, leave it zero here;
 		   when we read the local file header we might get

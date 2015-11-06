@@ -44,14 +44,14 @@ tar_path(void) {
 }
 
 static int
-do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, unsigned long long bytesTotal, const char *targetp) {
+do_extract(arc_type_t type, source_t *sourcep, source_file_t *filep, uint64_t bytesTotal, const char *targetp) {
     int pipe_fds[2];
     pid_t pid;
     char buffer[1024];
     char *argv[6];
     const char *tar;
     int n, result;
-    unsigned long long bytesRead = 0;
+    uint64_t bytesRead = 0;
     int percent;
 
     /* Create the pipe to feed the unarchiver process (e.g. tar). */
@@ -159,7 +159,7 @@ extract(source_t *sourcep, const char *archive, const char *targetp) {
     source_file_t *filep;
     arc_type_t type = ARC_UNKNOWN;
     struct stat target_stat;
-    unsigned long long bytesTotal;
+    uint64_t bytesTotal;
     size_t len;
     int result;
 
@@ -178,11 +178,8 @@ extract(source_t *sourcep, const char *archive, const char *targetp) {
             if (result == -1) result = errno;
             else if (!S_ISDIR(target_stat.st_mode)) result = ENOTDIR;
 
-            /* Get archive size */
-            bytesTotal = sourcep->size(sourcep, archive);
-
             /* Open source */
-            filep = sourcep->open(sourcep, archive);
+            filep = sourcep->open(sourcep, archive, &bytesTotal);
             if (filep != NULL) {
                 /* Do the actual extract */
                 result = do_extract(type, sourcep, filep, bytesTotal, targetp);
