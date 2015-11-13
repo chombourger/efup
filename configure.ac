@@ -66,6 +66,15 @@ AC_ARG_ENABLE(jpeg,
 	[enable_jpeg=no]
 )
 
+AC_ARG_ENABLE(networking,
+	AC_HELP_STRING(
+		[--enable-networking],
+		[enable networking support, @<:@default=no@:>@]
+	),
+	[],
+	[enable_networking=no]
+)
+
 AC_ARG_ENABLE(png,
 	AC_HELP_STRING(
 		[--enable-png],
@@ -74,6 +83,7 @@ AC_ARG_ENABLE(png,
 	[],
 	[enable_png=yes]
 )
+
 
 # Checks for programs.
 AC_PROG_AWK
@@ -315,6 +325,8 @@ AC_SUBST(USE_NSS,$USE_NSS)
 AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
 AC_SUBST(USE_CURL,$USE_CURL)
+
+AC_SUBST(USE_NETWORKING,$enable_networking)
 
 # Checks for header files.
 AC_HEADER_STDC
