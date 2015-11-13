@@ -28,9 +28,14 @@ c_files          :=
 c_files          += $(wildcard $(S)/libopkg/*.c)
 
 excl_c_files     :=
-excl_c_files     += $(S)/libopkg/opkg_download_wget.c
 excl_c_files     += $(S)/libopkg/opkg_gpg.c
 excl_c_files     += $(S)/libopkg/opkg_openssl.c
+
+ifndef USE_CURL
+excl_c_files     += $(S)/libopkg/opkg_download_curl.c
+else
+excl_c_files     += $(S)/libopkg/opkg_download_wget.c
+endif
 
 LOCAL_SRC_FILES  += $(filter-out $(excl_c_files),$(c_files))
 

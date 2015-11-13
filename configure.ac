@@ -21,6 +21,15 @@ AC_CONFIG_HEADERS([	\
 # Default to empty prefix (binaries going to /sbin and /lib)
 AC_PREFIX_DEFAULT()
 
+AC_ARG_ENABLE(curl,
+	AC_HELP_STRING(
+		[--enable-curl],
+		[enable support for curl @<:@default=no@:>@]
+	),
+	[],
+	[enable_curl=no]
+)
+
 AC_ARG_ENABLE(opkg,
 	AC_HELP_STRING(
 		[--enable-opkg],
@@ -164,9 +173,12 @@ AX_LUA_LIBS(true,true)
 check_nspr=yes
 check_nss=yes
 
+if test x$enable_curl = xyes; then
+   check_curl=yes
+fi
+
 if test x$enable_opkg = xyes; then
    check_opkg=yes
-   check_curl=yes
    check_archive=yes
    check_nspr=yes
    check_nss=yes
