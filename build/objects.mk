@@ -16,6 +16,9 @@ $(module)_o_files :=					\
 	$($(module)_cxx_files:%.cpp=$(outdir)/%.o)	\
 	$($(module)_s_files:%.s=$(outdir)/%.o)
 
+$(module)_o_mkd_files :=				\
+	$(patsubst %.o,%.o.mkd,$($(module)_o_files))
+
 clean_targets := $(clean_targets) $($(module)_o_files)
 
 $(module)_cflags := $(sys_cflags) $(LOCAL_CFLAGS)				\

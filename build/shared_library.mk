@@ -50,3 +50,5 @@ lib$(module).so: $($(module)_deps)
 $(D)$(libdir)/lib$(module).so: lib$(module).so
 	$(MKDIR_P) $(dir $@)
 	install -m 755 $< $@
+
+-include $($(module)_o_mkd_files)
