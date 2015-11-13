@@ -14,6 +14,7 @@ struct source_file;
 typedef struct source_file source_file_t;
 
 struct source {
+    const char *(* spec)(source_t *sourcep);
     void (* destroy)(source_t *sourcep);
     int (* verify)(source_t *sourcep);
     int  (* load)(source_t *sourcep, const char *path, void **bufferp, size_t *sizep);

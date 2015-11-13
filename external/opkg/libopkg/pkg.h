@@ -92,6 +92,8 @@ struct abstract_pkg {
     abstract_pkg_vec_t *replaced_by;
 };
 
+struct opkg_ar_fileops;
+
 /* XXX: CLEANUP: I'd like to clean up pkg_t in several ways:
 
    The 3 version fields should go into a single version struct. (This
@@ -156,6 +158,8 @@ struct pkg {
 
     char *filename;
     char *local_filename;
+    void *file_data;
+    struct opkg_ar_fileops *file_ops;
     char *tmp_unpack_dir;
     char *md5sum;
     char *sha256sum;

@@ -25,6 +25,11 @@ mdev_s(void);
 int
 efup_mount(const char *vol);
 
+#ifdef USE_OPKG
+int
+opkg(char **argv);
+#endif
+
 int
 efup_umount(const char *vol);
 

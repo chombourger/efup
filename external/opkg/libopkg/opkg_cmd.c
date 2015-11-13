@@ -398,6 +398,7 @@ static int opkg_install_cmd(int argc, char **argv)
     int r;
 
     signal(SIGINT, sigint_handler);
+    pkg_names_to_install = str_list_alloc();
 
     /*
      * Now scan through package names and install
@@ -406,35 +407,19 @@ static int opkg_install_cmd(int argc, char **argv)
         arg = argv[i];
 
         opkg_msg(DEBUG2, "%s\n", arg);
-        r = opkg_prepare_url_for_install(arg, &argv[i]);
-        if (r != 0)
+        r = opkg_prepare_url_for_install(arg, pkg_names_to_install);
+        if (r != 0) {
+            str_list_purge(pkg_names_to_install);
             return -1;
+        }
     }
     pkg_info_preinstall_check();
 
-    if (opkg_config->combine)
-        pkg_names_to_install = str_list_alloc();
+    r = opkg_install_multiple_by_name(pkg_names_to_install);
+    if (r != 0)
+        err = -1;
 
-    for (i = 0; i < argc; i++) {
-        arg = argv[i];
-        if (opkg_config->combine) {
-            str_list_append(pkg_names_to_install, arg);
-        } else {
-            r = opkg_install_by_name(arg);
-            if (r != 0) {
-                opkg_msg(ERROR, "Cannot install package %s.\n", arg);
-                err = -1;
-            }
-        }
-    }
-
-    if (opkg_config->combine) {
-        r = opkg_install_multiple_by_name(pkg_names_to_install);
-        if (r != 0)
-            err = -1;
-
-        str_list_purge(pkg_names_to_install);
-    }
+    str_list_purge(pkg_names_to_install);
 
     r = opkg_configure_packages(NULL);
     if (r != 0)

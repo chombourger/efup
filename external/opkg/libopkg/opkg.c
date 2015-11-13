@@ -202,14 +202,20 @@ int opkg_install_package(const char *package_url,
     pkg_vec_t *deps, *all;
     unsigned int i;
     char **unresolved = NULL;
-    char *package_name;
+    char *package_name = NULL;
+    str_list_t *pkg_names;
+    str_list_elt_t *iter;
 
     opkg_assert(package_url != NULL);
 
     /* Pre-process the package name to handle remote URLs and paths to
      * ipk/opk files.
      */
-    opkg_prepare_url_for_install(package_url, &package_name);
+    pkg_names = str_list_alloc();
+    opkg_prepare_url_for_install(package_url, pkg_names);
+    iter = str_list_first(pkg_names);
+    if (iter != NULL) package_name = iter->data;
+    str_list_purge(pkg_names);
 
     /* ... */
     pkg_info_preinstall_check();

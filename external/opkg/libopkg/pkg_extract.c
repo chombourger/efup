@@ -31,7 +31,7 @@ int pkg_extract_control_file_to_stream(pkg_t * pkg, FILE * stream)
     int r;
     struct opkg_ar *ar;
 
-    ar = ar_open_pkg_control_archive(pkg->local_filename);
+    ar = ar_open_pkg_control_archive(pkg->local_filename, pkg->file_ops, pkg->file_data);
     if (!ar) {
         opkg_msg(ERROR, "Failed to extract control.tar.gz from package '%s'.\n",
                  pkg->local_filename);
@@ -56,7 +56,7 @@ int pkg_extract_control_files_to_dir_with_prefix(pkg_t * pkg, const char *dir,
 
     sprintf_alloc(&dir_with_prefix, "%s/%s", dir, prefix);
 
-    ar = ar_open_pkg_control_archive(pkg->local_filename);
+    ar = ar_open_pkg_control_archive(pkg->local_filename, pkg->file_ops, pkg->file_data);
     if (!ar) {
         opkg_msg(ERROR, "Failed to extract control.tar.gz from package '%s'.\n",
                  pkg->local_filename);
@@ -86,7 +86,7 @@ int pkg_extract_data_files_to_dir(pkg_t * pkg, const char *dir)
     int r;
     struct opkg_ar *ar;
 
-    ar = ar_open_pkg_data_archive(pkg->local_filename);
+    ar = ar_open_pkg_data_archive(pkg->local_filename, pkg->file_ops, pkg->file_data);
     if (!ar) {
         opkg_msg(ERROR, "Failed to extract data.tar.gz from package '%s'.\n",
                  pkg->local_filename);
@@ -107,7 +107,7 @@ int pkg_extract_data_file_names_to_stream(pkg_t * pkg, FILE * stream)
     int r;
     struct opkg_ar *ar;
 
-    ar = ar_open_pkg_data_archive(pkg->local_filename);
+    ar = ar_open_pkg_data_archive(pkg->local_filename, pkg->file_ops, pkg->file_data);
     if (!ar) {
         opkg_msg(ERROR, "Failed to extract data.tar.gz from package '%s'.\n",
                  pkg->local_filename);

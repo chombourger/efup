@@ -31,6 +31,10 @@ LOCAL_SRC_FILES +=			\
 	src/partmgr.c			\
 	src/run.c			\
 	src/scripting/main.c		\
+	$(if $(DO_BUILD_OPKG),		\
+		src/opkg.c		\
+		src/scripting/opkg.c	\
+	)				\
 	src/scripting/ui.c		\
 	src/source.c			\
 	src/source_local_folder.c	\

@@ -37,9 +37,9 @@ int opkg_download_pkg_to_dir(pkg_t * pkg, const char *dir);
 char *pkg_download_signature(pkg_t * pkg);
 
 /*
- * Downloads file from url, installs in package database, return package name.
+ * Downloads file from url, installs in package database, add package name to list.
  */
-int opkg_prepare_url_for_install(const char *url, char **namep);
+int opkg_prepare_url_for_install(const char *url, str_list_t *listp);
 
 /* Cleanup function, does nothing unless opkg is configured with
  * '--enable-curl'.

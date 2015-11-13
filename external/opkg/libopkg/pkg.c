@@ -30,6 +30,7 @@
 
 #include "pkg_parse.h"
 #include "pkg_extract.h"
+#include "opkg_archive.h"
 #include "opkg_download.h"
 #include "opkg_message.h"
 #include "opkg_utils.h"
@@ -116,6 +117,8 @@ static void pkg_init(pkg_t * pkg)
     pkg->provides = NULL;
     pkg->filename = NULL;
     pkg->local_filename = NULL;
+    pkg->file_data = NULL;
+    pkg->file_ops = NULL;
     pkg->tmp_unpack_dir = NULL;
     pkg->md5sum = NULL;
     pkg->sha256sum = NULL;
@@ -221,6 +224,10 @@ void pkg_deinit(pkg_t * pkg)
     free(pkg->local_filename);
     pkg->local_filename = NULL;
 
+    if((pkg->file_ops) && (pkg->file_ops->free)) {
+        pkg->file_ops->free(pkg->file_data);
+    }
+
     /* CLEANUP: It'd be nice to pullin the cleanup function from
      * opkg_install.c here. See comment in
      * opkg_install.c:cleanup_temporary_files */
@@ -257,8 +264,6 @@ int pkg_init_from_file(pkg_t * pkg, const char *filename)
     int fd, err = 0;
     FILE *control_file;
     char *control_path, *tmp;
-
-    pkg_init(pkg);
 
     pkg->local_filename = xstrdup(filename);
 

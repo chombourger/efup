@@ -27,6 +27,11 @@ static lua_State *state = NULL;
 extern int
 luaopen_ui(lua_State *L);
 
+#ifdef USE_OPKG
+extern int
+lua_opkg_open(lua_State *L);
+#endif
+
 extern int
 strtosize(const char *str, uintmax_t *res);
 
@@ -375,6 +380,10 @@ scripting_init(void) {
         luaL_openlibs(state);
         luaL_requiref(state, "efup", lua_register_funcs, 1);
         lua_pop(state, 1);
+#ifdef USE_OPKG
+        luaL_requiref(state, "opkg", lua_opkg_open, 1);
+        lua_pop(state, 1);
+#endif
         luaL_requiref(state, "ui", luaopen_ui, 1);
         lua_pop(state, 1);
         result = 0;

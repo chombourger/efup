@@ -28,6 +28,7 @@
 #include "opkg_message.h"
 #include "opkg_verify.h"
 #include "opkg_utils.h"
+#include "opkg_zip.h"
 
 #include "sprintf_alloc.h"
 #include "file_util.h"
@@ -342,7 +343,7 @@ static int url_has_remote_protocol(const char *url)
     return 0;
 }
 
-static int opkg_prepare_file_for_install(const char *path, char **namep)
+static int opkg_prepare_file_for_install(const char *path, str_list_t *listp)
 {
     int r;
     pkg_t *pkg = pkg_new();
@@ -381,15 +382,15 @@ static int opkg_prepare_file_for_install(const char *path, char **namep)
 
     hash_insert_pkg(pkg, 1);
 
-    if (namep)
-        *namep = pkg->name;
+    if (listp)
+        str_list_append(listp, pkg->name);
     return 0;
 }
 
 /* Prepare a given URL for installation. We use a few simple heuristics to
  * determine whether this is a remote URL, file name or abstract package name.
  */
-int opkg_prepare_url_for_install(const char *url, char **namep)
+int opkg_prepare_url_for_install(const char *url, str_list_t *listp)
 {
     int r;
 
@@ -401,7 +402,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
         if (!cache_location)
             return -1;
 
-        r = opkg_prepare_file_for_install(cache_location, namep);
+        r = opkg_prepare_file_for_install(cache_location, listp);
         free(cache_location);
         return r;
     }
@@ -428,7 +429,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
             if (r)
                 return r;
 
-            return opkg_prepare_file_for_install(pkg->local_filename, namep);
+            return opkg_prepare_file_for_install(pkg->local_filename, listp);
         }
 
         /* Nothing special to do. */
@@ -436,8 +437,10 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
     }
 
     /* Third heuristic: Maybe it's a file. */
-    if (file_exists(url))
-        return opkg_prepare_file_for_install(url, namep);
+    if (file_exists(url)) {
+        if (opkg_check_zip(url) == 0) return opkg_prepare_zip_for_install(url, listp);
+        else return opkg_prepare_file_for_install(url, listp);
+    }
 
     /* Can't find anything matching the requested URL. */
     opkg_msg(ERROR, "Couldn't find anything to satisfy '%s'.\n", url);

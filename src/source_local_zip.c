@@ -19,16 +19,17 @@
 #include <sys/stat.h>
 
 struct zip_source {
-    source_t source;
-    const char *path;
+   source_t source;
+   const char *path;
 };
 
 struct source_file {
-    struct zip_source *sourcep;
-    struct archive *zip;
-    struct archive_entry *filep;
+   struct zip_source *sourcep;
+   struct archive *zip;
+   struct archive_entry *filep;
 };
 
+static const char *source_zip_spec(source_t *sourcep);
 static void source_zip_destroy(source_t *sourcep);
 static int source_zip_verify(source_t *sourcep);
 static uint64_t source_zip_size(source_t *sourcep, const char *path);
@@ -38,14 +39,29 @@ static int source_zip_read(source_file_t *filep, void *buf, size_t size);
 static void source_zip_close(source_file_t *filep);
 
 static const source_t zip_source_vtable = {
-    source_zip_destroy,
-    source_zip_verify,
-    source_zip_load,
-    source_zip_size,
-    source_zip_open,
-    source_zip_read,
-    source_zip_close
+   source_zip_spec,
+   source_zip_destroy,
+   source_zip_verify,
+   source_zip_load,
+   source_zip_size,
+   source_zip_open,
+   source_zip_read,
+   source_zip_close
 };
+
+
+static const char *
+source_zip_spec(source_t *sourcep) {
+   struct zip_source *zip_source = (struct zip_source *) sourcep;
+   const char *result;
+   if (zip_source != NULL) {
+      result = zip_source->path;
+   }
+   else {
+      result = NULL;
+   }
+   return result;
+}
 
 static struct archive *
 zip_open(const char *specp) {

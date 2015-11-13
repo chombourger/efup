@@ -21,13 +21,29 @@
 extern "C" {
 #endif
 
+struct archive;
+
+struct opkg_ar_fileops {
+    int (* open) (struct archive *, void *);
+    ssize_t (* read) (struct archive *, void *, const void **);
+    int (* close)(struct archive *, void *);
+    void (* free)(void *);
+};
+
 struct opkg_ar {
     struct archive *ar;
     int extract_flags;
+    char *filename;
+    struct opkg_ar_fileops *file_ops;
+    void *file_data;
 };
 
-struct opkg_ar *ar_open_pkg_control_archive(const char *filename);
-struct opkg_ar *ar_open_pkg_data_archive(const char *filename);
+struct opkg_ar *ar_open_pkg_control_archive(const char *filename,
+                                            struct opkg_ar_fileops *fileops,
+                                            void *data);
+struct opkg_ar *ar_open_pkg_data_archive(const char *filename,
+                                         struct opkg_ar_fileops *fileops,
+                                         void *data);
 struct opkg_ar *ar_open_compressed_file(const char *filename);
 int ar_copy_to_stream(struct opkg_ar *ar, FILE * stream);
 int ar_extract_file_to_stream(struct opkg_ar *ar, const char *filename,

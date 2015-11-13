@@ -479,7 +479,7 @@ static int extract_all(struct archive *a, const char *dest, int flags)
 }
 
 /* Open an outer archive with the given filename. */
-static struct archive *open_outer(const char *filename)
+static struct archive *open_outer(struct opkg_ar *ar)
 {
     struct archive *outer;
     int r;
@@ -498,9 +498,13 @@ static struct archive *open_outer(const char *filename)
         goto err_cleanup;
     }
 
-    r = archive_read_open_filename(outer, filename, EXTRACT_BUFFER_LEN);
+    if (ar->file_ops == NULL)
+        r = archive_read_open_filename(outer, ar->filename, EXTRACT_BUFFER_LEN);
+    else
+        r = archive_read_open(outer, ar->file_data, ar->file_ops->open,
+                              ar->file_ops->read, ar->file_ops->close);
     if (r != ARCHIVE_OK) {
-        opkg_msg(ERROR, "Failed to open package '%s': %s\n", filename,
+        opkg_msg(ERROR, "Failed to open package '%s': %s\n", ar->filename,
                  archive_error_string(outer));
         goto err_cleanup;
     }
@@ -597,13 +601,13 @@ static int find_inner(struct archive *outer, const char *arname)
  * archive, returning a `struct archive *` for the enclosed file. On error,
  * return NULL.
  */
-static struct archive *extract_outer(const char *filename, const char *arname)
+static struct archive *extract_outer(struct opkg_ar *ar, const char *arname)
 {
     int r;
     struct archive *inner;
     struct archive *outer;
 
-    outer = open_outer(filename);
+    outer = open_outer(ar);
     if (!outer)
         return NULL;
 
@@ -673,14 +677,20 @@ static struct archive *open_compressed_file(const char *filename)
  * Glue layer.
  */
 
-struct opkg_ar *ar_open_pkg_control_archive(const char *filename)
+struct opkg_ar *ar_open_pkg_control_archive(const char *filename,
+                                            struct opkg_ar_fileops *file_ops,
+                                            void *file_data)
 {
     struct opkg_ar *ar;
 
     ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
+    ar->filename  = xstrdup(filename);
+    ar->file_ops  = file_ops;
+    ar->file_data = file_data;
 
-    ar->ar = extract_outer(filename, "control.tar.gz");
+    ar->ar = extract_outer(ar, "control.tar.gz");
     if (!ar->ar) {
+        free(ar->filename);
         free(ar);
         return NULL;
     }
@@ -695,14 +705,20 @@ struct opkg_ar *ar_open_pkg_control_archive(const char *filename)
     return ar;
 }
 
-struct opkg_ar *ar_open_pkg_data_archive(const char *filename)
+struct opkg_ar *ar_open_pkg_data_archive(const char *filename,
+                                         struct opkg_ar_fileops *file_ops,
+                                         void *file_data)
 {
     struct opkg_ar *ar;
 
     ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
+    ar->filename  = xstrdup(filename);
+    ar->file_ops  = file_ops;
+    ar->file_data = file_data;
 
-    ar->ar = extract_outer(filename, "data.tar.gz");
+    ar->ar = extract_outer(ar, "data.tar.gz");
     if (!ar->ar) {
+        free(ar->filename);
         free(ar);
         return NULL;
     }
@@ -725,8 +741,9 @@ struct opkg_ar *ar_open_compressed_file(const char *filename)
     struct archive_entry *entry;
 
     ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
-
+    ar->filename = xstrdup(filename);
     ar->ar = open_compressed_file(filename);
+
     if (!ar->ar)
         goto err_cleanup;
 
@@ -775,5 +792,6 @@ int ar_extract_all(struct opkg_ar *ar, const char *prefix)
 void ar_close(struct opkg_ar *ar)
 {
     archive_read_free(ar->ar);
+    free(ar->filename);
     free(ar);
 }
