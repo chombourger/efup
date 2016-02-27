@@ -523,6 +523,7 @@ AC_CHECK_FUNCS([	\
 	stricmp		\
 	strncasecmp	\
 	strncmpi	\
+	strndup		\
 	strstr		\
 	strtok_r	\
 	strtol		\
