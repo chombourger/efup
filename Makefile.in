@@ -46,7 +46,7 @@ include main.mk
 .PHONY: distclean force
 
 distclean: clean
-	@rm -rf config.log config.status Makefile configure autom4te.cache aclocal.m4
+	@rm -rf config.log config.status Makefile configure autom4te.cache aclocal.m4 out
 
 force:
 
