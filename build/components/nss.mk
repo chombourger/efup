@@ -477,7 +477,6 @@ LOCAL_SRC_FILES :=					\
 	$(NSS)/util/nssrwlk.c				\
 	$(NSS)/util/nssilock.c				\
 	$(NSS)/util/oidstring.c				\
-	$(NSS)/util/pkcs1sig.c				\
 	$(NSS)/util/portreg.c				\
 	$(NSS)/util/secalgid.c				\
 	$(NSS)/util/secasn1d.c				\
