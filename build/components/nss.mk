@@ -331,7 +331,6 @@ LOCAL_SRC_FILES +=					\
 	$(NSS)/certhigh/certhigh.c					\
 	$(NSS)/certhigh/certvfy.c					\
 	$(NSS)/certhigh/certvfypkix.c					\
-	$(NSS)/certhigh/certvfypkixprint.c				\
 	$(NSS)/certhigh/xcrldist.c					\
 	$(NSS)/pk11wrap/dev3hack.c					\
 	$(NSS)/pk11wrap/pk11akey.c					\
@@ -477,6 +476,7 @@ LOCAL_SRC_FILES :=					\
 	$(NSS)/util/nssrwlk.c				\
 	$(NSS)/util/nssilock.c				\
 	$(NSS)/util/oidstring.c				\
+	$(NSS)/util/pkcs1sig.c				\
 	$(NSS)/util/portreg.c				\
 	$(NSS)/util/secalgid.c				\
 	$(NSS)/util/secasn1d.c				\
