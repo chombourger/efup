@@ -1,0 +1,3 @@
+[submodule "toolchains/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf"]
+	path = toolchains/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf
+	url = git@github.com:chombourger/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf.git

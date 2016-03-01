@@ -1,0 +1,11 @@
+# git submodule to fetch for prebuilt toolchains
+TOOLCHAIN_GIT_SUBMODULE=toolchains/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf
+
+# path to the toolchain
+TOOLCHAIN_PATH=${TOOLCHAIN_GIT_SUBMODULE}
+
+# host for autoconf
+HOST=arm-linux-gnueabihf
+
+# path to the sysroot
+SYSROOT=${TOOLCHAIN_PATH}/${HOST}/libc
