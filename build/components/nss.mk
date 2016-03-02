@@ -359,6 +359,7 @@ LOCAL_SRC_FILES +=					\
 	$(NSS)/cryptohi/secvfy.c					\
 	$(NSS)/cryptohi/dsautil.c					\
 	$(NSS)/nss/nssinit.c						\
+	$(NSS)/nss/nssoptions.c						\
 	$(NSS)/nss/nssver.c						\
 	$(NSS)/nss/utilwrap.c						\
 	$(NSS)/pkcs12/p12local.c					\
