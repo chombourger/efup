@@ -54,6 +54,21 @@ reset_efup_config() {
    unset UBOOT_CONFIG_BUILD_CMD
 }
 
+print_efup_config() {
+   echo
+   test -n "${HOST}" && \
+      echo "HOST=${HOST}"
+   test -n "${TOOLCHAIN_PATH}" && \
+      echo "TOOLCHAIN_PATH=${TOOLCHAIN_PATH}"
+   test -n "${SYSROOT}" && \
+      echo "SYSROOT=${SYSROOT}"
+   test -n "${UBOOT_PATH}" && \
+      echo "UBOOT_PATH=${UBOOT_PATH}"
+   test -n "${UBOOT_CONFIG}" && \
+      echo "UBOOT_CONFIG=${UBOOT_CONFIG}"
+   echo
+}
+
 load_efup_config() {
    local config=${1}
 
@@ -81,14 +96,62 @@ add_efup_variant() {
    EFUP_VARIANTS=(${EFUP_VARIANTS[@]} ${new_variant})
 }
 
-lunch() {
-   local target=${1}
-   local config
-   local variant
+print_lunch_menu() {
+   local i=1
+   local c
+   echo
+   echo "Lunch menu... pick one of these:"
+   for c in ${EFUP_CONFIGS[@]}
+   do
+      echo "     ${i}. ${c}"
+      i=$((${i}+1))
+   done
+   echo
+}
+
+print_cooked_menu() {
+   local i=1
    local v
+   echo
+   echo "How would you like it cooked:"
+   for v in ${EFUP_VARIANTS[@]}
+   do
+      echo "     ${i}. ${v}"
+      i=$((${i}+1))
+   done
+   echo
+}
+
+lunch() {
+   local config target variant
+   local c v
 
    unset EFUP_CONFIG
    unset EFUP_VARIANT
+
+   if [ -n "${1}" ]; then
+      target=${1}
+   else
+      print_lunch_menu
+      echo -n "Your choice: "
+      read c
+      if (echo -n ${c} | grep -q -e "^[0-9][0-9]*$"); then
+         config=${EFUP_CONFIGS[$((${c}-1))]}
+         print_cooked_menu
+         echo -n "Your choice: "
+         read v
+         if (echo -n ${v} | grep -q -e "^[0-9][0-9]*$"); then
+            variant=${EFUP_VARIANTS[$((${v}-1))]}
+            target=${config}-${variant}
+         else
+            echo "error: invalid choice!" 2>&1
+            return 1
+         fi
+      else
+         echo "error: invalid choice!" 2>&1
+         return 1
+      fi
+   fi
 
    for v in ${EFUP_VARIANTS[@]}; do
       if [[ "${target}" == *-${v} ]]; then
@@ -101,8 +164,7 @@ lunch() {
       EFUP_CONFIG=${config}
       EFUP_VARIANT=${variant}
       if load_efup_config ${config}; then
-         echo "config=${config}"
-         echo "variant=${variant}"
+         print_efup_config
          export EFUP_CONFIG
          export EFUP_VARIANT
       else

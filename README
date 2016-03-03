@@ -24,7 +24,8 @@ The following development headers and libaries are required:
 EFUP may then be built with:
 
    . build/envsetup.sh
-   lunch arm-generic-linaro-4.9-prod
+   lunch
+   fetch-dependencies
    configure
    make
 
