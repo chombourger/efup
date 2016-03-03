@@ -82,7 +82,7 @@ initramfs: certs.db force
 	$(STRIP) $(STRIP_FLAGS) initramfs$(libdir)/*.so*
 	$(if $(wildcard out/target/bb/_install),					\
 		cp -ra out/target/bb/_install/* initramfs && )true
-	$(if $(SYSROOT),	\
+	$(if $(SYSROOT), 								\
 		$(MKDIR_P) initramfs/lib &&						\
 		$(INSTALL) -m 755 $(SYSROOT)/lib/ld-linux-armhf.so.3 initramfs/lib &&	\
 		$(INSTALL) -m 755 $(SYSROOT)/lib/libc.so.6 initramfs/lib &&		\
@@ -91,8 +91,10 @@ initramfs: certs.db force
 		$(INSTALL) -m 755 $(SYSROOT)/lib/libm.so.6 initramfs/lib &&		\
 		$(INSTALL) -m 755 $(SYSROOT)/lib/libpthread.so.0 initramfs/lib &&	\
 		$(INSTALL) -m 755 $(SYSROOT)/lib/librt.so.1 initramfs/lib &&		\
-		true									\
-	)
+	)true
+	$(if $(wildcard $(SYSROOT)/lib/libstdc++.so.6), 				\
+		$(INSTALL) -m 755 $(SYSROOT)/lib/libstdc++.so.6 initramfs/lib &&	\
+	)true
 
 initramfs.cpio: initramfs
 	(cd initramfs && find . | cpio -R 0:0 -H newc -o > ../$@)

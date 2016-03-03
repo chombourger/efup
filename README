@@ -23,24 +23,10 @@ The following development headers and libaries are required:
 
 EFUP may then be built with:
 
-   ./autogen.sh && ./configure
+   . build/envsetup.sh
+   lunch arm-generic-linaro-4.9-prod
+   configure
    make
-
-Cross-compiling
----------------
-
-EFUP may be crossed-compiled for an embedded Linux system as follows:
-
-   source configs/arm-generic-linaro-4.9
-   export PATH=$PWD/$TOOLCHAIN_PATH/bin:$PATH
-   export SYSROOT
-   export PKG_CONFIG_DIR=
-   export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
-   export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
-   ./autogen.sh && ./configure --host=$HOST
-   make
-
-with SYSROOT, CFLAGS and --host set for your platform.
 
 Scripting commands
 ------------------
