@@ -40,6 +40,10 @@ PERL    = @PERL@
 
 BUILD_CC = @BUILD_CC@
 
+ifneq ($(EFUP_CONFIG),)
+-include $(EFUP_DIR)/configs/$(EFUP_CONFIG)/settings.inc
+endif
+
 include settings.mk
 include main.mk
 

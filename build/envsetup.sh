@@ -27,8 +27,11 @@ add_efup_config() {
 
 add_efup_configs() {
    local c
-   for c in ${EFUP_DIR}/configs/*; do
-      test -f ${c} && add_efup_config `basename ${c}`
+   for c in ${EFUP_DIR}/configs/*/settings.inc; do
+      test ! -f ${c} && continue
+      c=`dirname ${c}`
+      c=`basename ${c}`
+      add_efup_config ${c}
    done
 }
 
@@ -73,8 +76,14 @@ load_efup_config() {
    local config=${1}
 
    reset_efup_config
-   if source ${EFUP_DIR}/configs/${config}; then
-      export PATH=$PWD/$TOOLCHAIN_PATH/bin:$PATH
+   if source ${EFUP_DIR}/configs/${config}/settings.inc; then
+      if [ -n "${TOOLCHAIN_GIT_SUBMODULE}" -a -z "${TOOLCHAIN_PATH}" ]; then
+         TOOLCHAIN_PATH=${TOOLCHAIN_GIT_SUBMODULE}
+      fi
+      if [ -n "${UBOOT_GIT_SUBMODULE}" -a -z "${UBOOT_PATH}" ]; then
+         UBOOT_PATH=${UBOOT_GIT_SUBMODULE}
+      fi
+      export PATH=${PWD}/${TOOLCHAIN_PATH}/bin:${PATH}
       export SYSROOT
       export PKG_CONFIG_DIR=
       export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
