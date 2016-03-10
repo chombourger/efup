@@ -12,22 +12,24 @@ endif
 
 ifdef UBOOT_PATH
 
-# make O=/home/chombourger/Projects/efup/out/target/u-boot V=1 KBUILD_SRC=/home/chombourger/Projects/efup/boards/bcmadvancedresearch/ar6mxq/u-boot-imx -f /home/chombourger/Projects/efup/boards/bcmadvancedresearch/ar6mxq/u-boot-imx/Makefile
-
 $(outdir)/u-boot/.config:
 	$(MKDIR_P) $(dir $@)
-	$(MAKE) -f $(EFUP_DIR)/$(UBOOT_PATH)/Makefile	\
-		-C $(outdir)/u-boot			\
-		O=$(outdir)/u-boot			\
-		KBUILD_SRC=$(EFUP_DIR)/$(UBOOT_PATH)	\
+	$(MAKE) -f $(EFUP_DIR)/$(UBOOT_PATH)/Makefile		\
+		-C $(outdir)/u-boot				\
+		O=$(outdir)/u-boot				\
+		ARCH=$(HOST_CPU)				\
+		CROSS_COMPILE=$(patsubst %-gcc,%-,$(CC))	\
+		KBUILD_SRC=$(EFUP_DIR)/$(UBOOT_PATH)		\
 		$(UBOOT_CONFIG)
 
 $(outdir)/u-boot/u-boot.bin: $(outdir)/u-boot/.config
 	$(MKDIR_P) $(dir $@)
-	$(MAKE) -f $(EFUP_DIR)/$(UBOOT_PATH)/Makefile	\
-		-C $(outdir)/u-boot			\
-		O=$(outdir)/u-boot			\
-		KBUILD_SRC=$(EFUP_DIR)/$(UBOOT_PATH)	\
+	$(MAKE) -f $(EFUP_DIR)/$(UBOOT_PATH)/Makefile		\
+		-C $(outdir)/u-boot				\
+		O=$(outdir)/u-boot				\
+		ARCH=$(HOST_CPU)				\
+		CROSS_COMPILE=$(patsubst %-gcc,%-,$(CC))	\
+		KBUILD_SRC=$(EFUP_DIR)/$(UBOOT_PATH)		\
 		$(UBOOT_MAKE_GOAL)
 
 # build and clean targets
