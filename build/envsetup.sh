@@ -54,7 +54,10 @@ reset_efup_config() {
    unset UBOOT_GIT_SUBMODULE
    unset UBOOT_PATH
    unset UBOOT_CONFIG
-   unset UBOOT_CONFIG_BUILD_CMD
+   unset LINUX_GIT_SUBMODULE
+   unset LINUX_PATH
+   unset LINUX_CONFIG
+   unset LINUX_MAKE_GOALS
 }
 
 print_efup_config() {
@@ -69,6 +72,10 @@ print_efup_config() {
       echo "UBOOT_PATH=${UBOOT_PATH}"
    test -n "${UBOOT_CONFIG}" && \
       echo "UBOOT_CONFIG=${UBOOT_CONFIG}"
+   test -n "${LINUX_PATH}" && \
+      echo "LINUX_PATH=${LINUX_PATH}"
+   test -n "${LINUX_CONFIG}" && \
+      echo "LINUX_CONFIG=${LINUX_CONFIG}"
    echo
 }
 
@@ -82,6 +89,9 @@ load_efup_config() {
       fi
       if [ -n "${UBOOT_GIT_SUBMODULE}" -a -z "${UBOOT_PATH}" ]; then
          UBOOT_PATH=${UBOOT_GIT_SUBMODULE}
+      fi
+      if [ -n "${LINUX_GIT_SUBMODULE}" -a -z "${LINUX_PATH}" ]; then
+         LINUX_PATH=${LINUX_GIT_SUBMODULE}
       fi
       export PATH=${PWD}/${TOOLCHAIN_PATH}/bin:${PATH}
       export SYSROOT
@@ -230,6 +240,16 @@ fetch-dependencies() {
    if [ -n "${UBOOT_GIT_SUBMODULE}" ]; then
       git submodule init ${UBOOT_GIT_SUBMODULE} && \
       git submodule update ${UBOOT_GIT_SUBMODULE}
+      ret=${?}
+   else
+      ret=0
+   fi
+
+   test ${ret} -eq 0 || return ${ret}
+
+   if [ -n "${LINUX_GIT_SUBMODULE}" ]; then
+      git submodule init ${LINUX_GIT_SUBMODULE} && \
+      git submodule update ${LINUX_GIT_SUBMODULE}
       ret=${?}
    else
       ret=0
