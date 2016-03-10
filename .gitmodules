@@ -4,3 +4,6 @@
 [submodule "boards/bcmadvancedresearch/ar6mxq/u-boot-imx"]
 	path = boards/bcmadvancedresearch/ar6mxq/u-boot-imx
 	url = https://github.com/bcmadvancedresearch/u-boot-imx.git
+[submodule "boards/bcmadvancedresearch/ar6mxq/linux-imx6"]
+	path = boards/bcmadvancedresearch/ar6mxq/linux-imx6
+	url = https://github.com/bcmadvancedresearch/linux-imx6.git
