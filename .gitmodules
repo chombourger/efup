@@ -3,7 +3,7 @@
 	url = git@github.com:chombourger/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf.git
 [submodule "boards/bcmadvancedresearch/ar6mxq/u-boot-imx"]
 	path = boards/bcmadvancedresearch/ar6mxq/u-boot-imx
-	url = https://github.com/bcmadvancedresearch/u-boot-imx.git
+	url = https://github.com/chombourger/u-boot-ar6mx.git
 [submodule "boards/bcmadvancedresearch/ar6mxq/linux-imx6"]
 	path = boards/bcmadvancedresearch/ar6mxq/linux-imx6
 	url = https://github.com/bcmadvancedresearch/linux-imx6.git
