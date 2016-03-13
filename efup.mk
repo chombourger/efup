@@ -21,6 +21,7 @@ LOCAL_C_INCLUDES += 				\
 	external/util-linux/libfdisk/src	\
 
 LOCAL_SRC_FILES +=			\
+	src/debug.c			\
 	src/extract.c			\
 	src/format.c			\
 	src/fstab.c			\
@@ -47,6 +48,11 @@ LOCAL_SRC_FILES +=			\
 	src/volume.c			\
 
 LOCAL_CFLAGS += -Wall $(LUA_INCLUDE) $(NSS_CFLAGS) $(NSPR_CFLAGS) $(DFB_CFLAGS)
+
+# Debug support
+LOCAL_CFLAGS += $(EFUP_BUILD_DEBUGS:%=-DEFUP_BUILD_DEBUGS=%)
+
+# DirectFB support
 LOCAL_CFLAGS += $(DO_BUILD_DIRECTFB:%=-DDO_BUILD_DIRECTFB)
 
 LOCAL_CFLAGS += $(DO_BUILD_OPKG:%=-DUSE_OPKG)

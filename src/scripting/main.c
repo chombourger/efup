@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include <efup/debug.h>
 #include <efup/efup.h>
 #include <efup/fstab.h>
 #include <efup/partmgr.h>
@@ -265,7 +266,10 @@ lua_partmgr_new(lua_State *L) {
        luaL_setmetatable(L, PartMgrTypeName);
        return 1;
     }
-    else return 0;
+    else {
+       EFUP_DEBUG("partmgr_init(%s) failed!", dev);
+       return 0;
+    }
 }
 
 static int
@@ -289,6 +293,10 @@ lua_partmgr_add(lua_State *L) {
    }
 
    result = partmgr_add(pPartMgr->context, type, size, start);
+   if (result != 0) {
+      EFUP_DEBUG("partmgr_add(type=%x,size=%llu,start=%llu) failed (%d)",
+         type, size, size, start, result);
+   }
    lua_pushnumber(state, result);
    return 1;
 }
@@ -299,6 +307,9 @@ lua_partmgr_reset(lua_State *L) {
    int result;
 
    result = partmgr_reset(pPartMgr->context);
+   if (result != 0) {
+       EFUP_DEBUG("partmgr_reset failed (%d)", result);
+   }
    lua_pushnumber(state, result);
    return 1;
 }
@@ -309,6 +320,9 @@ lua_partmgr_write(lua_State *L) {
    int result;
 
    result = partmgr_write(pPartMgr->context);
+   if (result != 0) {
+       EFUP_DEBUG("partmgr_write failed (%d)", result);
+   }
    lua_pushnumber(state, result);
    return 1;
 }

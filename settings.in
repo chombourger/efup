@@ -8,6 +8,10 @@ datadir=@datadir@
 
 host_cpu=@host_cpu@
 
+# Debug support
+EFUP_BUILD_DEBUG=@EFUP_BUILD_DEBUG@
+EFUP_BUILD_DEBUGS=@EFUP_BUILD_DEBUGS@
+
 # opkg
 USE_OPKG=@USE_OPKG@
 

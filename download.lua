@@ -7,18 +7,23 @@ efup:umount("/volumes/data")
 
 PrintMessage("Partitioning boot device...")
 pm = efup:partition("/dev/sdb")
-ret = pm:reset()
-if ret == 0 then
-   ret = pm:add(0xc, "200M")
+if pm then
+   ret = pm:reset()
    if ret == 0 then
-      ret = pm:add(0x83, "2G")
+      ret = pm:add(0xc, "200M")
       if ret == 0 then
-         ret = pm:add(0x83)
+         ret = pm:add(0x83, "2G")
+         if ret == 0 then
+            ret = pm:add(0x83)
+         end
       end
    end
-   if ret ~= 0 then
-      failure="Failed to partition boot device!"
-   end
+else
+   ret=1
+end
+
+if ret ~= 0 then
+   failure="Failed to partition boot device!"
 end
 
 -- Write partition table

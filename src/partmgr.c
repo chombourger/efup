@@ -2,7 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include <efup/debug.h>
 #include <efup/partmgr.h>
+
 #include <libfdisk.h>
 
 #include <errno.h>
@@ -19,6 +21,7 @@ partmgr_init(const char *dev) {
    if (context) {
       result = fdisk_assign_device(context, dev, 0);
       if (result != 0) {
+         EFUP_DEBUG("fdisk_assign_device(%s) failed (%d)!", dev, result);
          fdisk_unref_context(context);
          context = NULL;
       }
@@ -29,6 +32,10 @@ partmgr_init(const char *dev) {
          }
       }
    }
+   else {
+      EFUP_DEBUG("fdisk_new_context failed!");
+   }
+
    return context;
 }
 
@@ -45,10 +52,22 @@ partmgr_reset(void *ctx) {
          if (result == 0) {
             label = fdisk_get_label(context, "dos");
             result = fdisk_dos_enable_compatible(label, 0);
+            if (result != 0) {
+               EFUP_DEBUG("fdisk_dos_enable_compatible failed (%d)", result);
+            }
+         }
+         else {
+            EFUP_DEBUG("fdisk_reset_alignment failed (%d)", result);
          }
       }
+      else {
+         EFUP_DEBUG("fdisk_create_disklabel(\"dos\") failed (%d)!", result);
+      }
    }
-   else result = EBADF;
+   else {
+      EFUP_DEBUG("partmgr_reset called without context!");
+      result = EBADF;
+   }
 
    return result;
 }

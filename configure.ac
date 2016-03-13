@@ -84,6 +84,36 @@ AC_ARG_ENABLE(png,
 	[enable_png=yes]
 )
 
+AC_ARG_ENABLE(debug,
+              AC_HELP_STRING([--enable-debug],
+                             [enable debugging @<:@default=no@:>@]),
+              [], [enable_debug=no])
+if test "$enable_debug" = "yes"; then
+    CFLAGS="-g3 -O0 -fno-inline -Wno-inline $CFLAGS"
+    EFUP_BUILD_DEBUG=1
+else
+    EFUP_BUILD_DEBUG=0
+fi
+AM_CONDITIONAL(ENABLE_DEBUG, test "$enable_debug" = "yes")
+AC_SUBST(EFUP_BUILD_DEBUG)
+
+AC_ARG_ENABLE(debug-support,
+              AC_HELP_STRING([--enable-debug-support],
+                             [enable debugging support @<:@default=yes@:>@]),
+              [], [enable_debug_support=yes])
+if test "$enable_debug_support" = "yes" || test "$enable_debug" = "yes"; then
+    enable_debug_support=yes
+    if test "$enable_debug" = "no"; then
+        CFLAGS="-g2 $CFLAGS"
+    fi
+    CFLAGS="-O2 $CFLAGS"
+    EFUP_BUILD_DEBUGS=1
+else
+    CFLAGS="-Os -g0 -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,-O1 $CFLAGS"
+    EFUP_BUILD_DEBUGS=0
+fi
+AM_CONDITIONAL(ENABLE_DEBUGS, test "$enable_debug_support" = "yes")
+AC_SUBST(EFUP_BUILD_DEBUGS)
 
 # Checks for programs.
 AC_PROG_AWK
@@ -643,37 +673,10 @@ AC_SUBST(FUSION_MESSAGE_SIZE)
 
 AC_ARG_ENABLE([directfb], AS_HELP_STRING([--enable-directfb], [Enable DirectFB]))
 
-AC_ARG_ENABLE(debug,
-              AC_HELP_STRING([--enable-debug],
-                             [enable debugging @<:@default=no@:>@]),
-              [], [enable_debug=no])
-if test "$enable_debug" = "yes"; then
-    CFLAGS="-g3 -O0 -fno-inline -Wno-inline $CFLAGS"
-    DIRECT_BUILD_DEBUG=1
-else
-    DIRECT_BUILD_DEBUG=0
-fi
-AM_CONDITIONAL(ENABLE_DEBUG, test "$enable_debug" = "yes")
-
+DIRECT_BUILD_DEBUG=$EFUP_BUILD_DEBUG
 AC_SUBST(DIRECT_BUILD_DEBUG)
 
-AC_ARG_ENABLE(debug-support,
-              AC_HELP_STRING([--enable-debug-support],
-                             [enable debugging support @<:@default=yes@:>@]),
-              [], [enable_debug_support=yes])
-if test "$enable_debug_support" = "yes" || test "$enable_debug" = "yes"; then
-    enable_debug_support=yes
-    if test "$enable_debug" = "no"; then
-        CFLAGS="-g2 $CFLAGS"
-    fi
-    CFLAGS="-O2 $CFLAGS"
-    DIRECT_BUILD_DEBUGS=1
-else
-    CFLAGS="-Os -g0 -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,-O1 $CFLAGS"
-    DIRECT_BUILD_DEBUGS=0
-fi
-AM_CONDITIONAL(ENABLE_DEBUGS, test "$enable_debug_support" = "yes")
-
+DIRECT_BUILD_DEBUGS=$EFUP_BUILD_DEBUGS
 AC_SUBST(DIRECT_BUILD_DEBUGS)
 
 AC_ARG_ENABLE(trace,
@@ -689,7 +692,6 @@ fi
 AM_CONDITIONAL(ENABLE_TRACE, test "$enable_trace" = "yes")
 
 AC_SUBST(DIRECT_BUILD_TRACE)
-
 
 AC_ARG_ENABLE(text,
               AC_HELP_STRING([--enable-text],
