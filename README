@@ -29,6 +29,9 @@ EFUP may then be built with:
    configure
    make
 
+External toolchains such as Mentor's require the EXTERNAL_TOOLCHAIN environment
+variable to be set.
+
 Scripting commands
 ------------------
 

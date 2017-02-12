@@ -84,8 +84,13 @@ load_efup_config() {
 
    reset_efup_config
    if source ${EFUP_DIR}/configs/${config}/settings.inc; then
+      if [ -n "${EXTERNAL_TOOLCHAIN}" -a -z "${TOOLCHAIN_PATH}" ]; then
+         TOOLCHAIN_PATH=${EXTERNAL_TOOLCHAIN}
+         export PATH=${TOOLCHAIN_PATH}/bin:${PATH}
+      fi
       if [ -n "${TOOLCHAIN_GIT_SUBMODULE}" -a -z "${TOOLCHAIN_PATH}" ]; then
          TOOLCHAIN_PATH=${TOOLCHAIN_GIT_SUBMODULE}
+         export PATH=${PWD}/${TOOLCHAIN_PATH}/bin:${PATH}
       fi
       if [ -n "${UBOOT_GIT_SUBMODULE}" -a -z "${UBOOT_PATH}" ]; then
          UBOOT_PATH=${UBOOT_GIT_SUBMODULE}
@@ -93,7 +98,6 @@ load_efup_config() {
       if [ -n "${LINUX_GIT_SUBMODULE}" -a -z "${LINUX_PATH}" ]; then
          LINUX_PATH=${LINUX_GIT_SUBMODULE}
       fi
-      export PATH=${PWD}/${TOOLCHAIN_PATH}/bin:${PATH}
       export SYSROOT
       export PKG_CONFIG_DIR=
       export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
